@@ -1,8 +1,32 @@
 version: '3.4'
 
 services:
+
+  db:
+    image: postgres:10.5
+    restart: always
+    ports:
+    - "5432:5432"
+    environment:
+      POSTGRES_DB: tamagotchi-competition
+      POSTGRES_PASSWORD: root
+    volumes:
+    - "postgres-data-auth:/var/lib/postgresql/data"
+
   tamagotchi.competition:
     image: ${DOCKER_REGISTRY}tamagotchicompetition
     build:
       context: .
       dockerfile: Tamagotchi.Competition/Dockerfile
+    depends_on:
+    - "db"
+
+  adminer:
+    image: adminer:4
+    restart: always
+    ports:
+    - "9999:8080"
+
+volumes:
+  postgres-data-auth:
+    driver: local
