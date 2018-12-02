@@ -4,6 +4,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Swashbuckle.AspNetCore.Swagger;
+using Swashbuckle.AspNetCore.SwaggerGen;
+using System;
+using System.IO;
 using Tamagotchi.Competition.AppSettings;
 
 namespace Tamagotchi.Competition
@@ -30,6 +34,27 @@ namespace Tamagotchi.Competition
             services
                 .AddMvc()
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services
+               .AddSwaggerGen(c =>
+               {
+                   c.SwaggerDoc("1.0.0", new Info
+                   {
+                       Version = "1.0.0",
+                       Title = "Competition API",
+                       Description = "Tamagotchi Competition API",
+                       Contact = new Contact()
+                       {
+                           Name = "Swagger",
+                           Url = "https://github.com/swagger-api/",
+                           Email = "ppp@ppp.io"
+                       },
+                       TermsOfService = "http://swagger.io/terms/"
+                   });
+                   c.CustomSchemaIds(type => type.FriendlyId(true));
+                   c.DescribeAllEnumsAsStrings();
+                   //c.IncludeXmlComments($"{AppContext.BaseDirectory}{Path.DirectorySeparatorChar}{Environment.ApplicationName}.xml");                   
+                   //c.DocumentFilter<BasePathFilter>("/v2");                  
+               });
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
@@ -38,6 +63,17 @@ namespace Tamagotchi.Competition
                 app.UseDeveloperExceptionPage();
             else
                 app.UseHsts();
+            app
+               .UseMvc()
+               .UseDefaultFiles()
+               .UseStaticFiles()
+               .UseSwagger()
+               .UseSwaggerUI(c =>
+               {
+                   c.RoutePrefix = "swagger/ui";
+                   c.SwaggerEndpoint("/swagger/1.0.0/swagger.json", "Competition API");
+               });
+
             loggerFactory.AddConsole(Configuration.GetSection(ConfigSections.LOGGING));
             loggerFactory.AddDebug();
             app.UseHttpsRedirection();
