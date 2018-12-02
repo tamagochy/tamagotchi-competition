@@ -17,4 +17,8 @@
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.0.1916590" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Tamagotchi.Competition.Helpers\Tamagotchi.Competition.Helpers.csproj" />
+  </ItemGroup>
+
 </Project>
