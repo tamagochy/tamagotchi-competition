@@ -1,6 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace Tamagotchi.Competition.Context
 {
@@ -34,8 +32,7 @@ namespace Tamagotchi.Competition.Context
                 entity.ToTable("EVENTS");
 
                 entity.Property(e => e.Id)
-                    .HasColumnName("ID")
-                    .ValueGeneratedNever();
+                    .HasColumnName("ID");
 
                 entity.Property(e => e.ActionCode)
                     .IsRequired()
@@ -70,8 +67,7 @@ namespace Tamagotchi.Competition.Context
                 entity.ToTable("SCORE");
 
                 entity.Property(e => e.Id)
-                    .HasColumnName("ID")
-                    .ValueGeneratedNever();
+                    .HasColumnName("ID");
 
                 entity.Property(e => e.UserId).HasColumnName("USER_ID");
 
