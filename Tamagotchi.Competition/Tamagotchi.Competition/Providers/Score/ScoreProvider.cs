@@ -1,10 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using RestSharp;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Tamagotchi.Competition.Context;
 using Tamagotchi.Competition.Helpers.API;
+using Tamagotchi.Competition.Helpers.Rest;
 using Tamagotchi.Competition.Models;
 using Tamagotchi.Competition.Providers.Event;
 
@@ -49,8 +52,21 @@ namespace Tamagotchi.Competition.Providers.Score
             .Take(takeCount);
             if (!await topPlayers.AnyAsync())
                 return new ApiResult<IEnumerable<ScoreViewModel>> { Error = new Error { } };
-            //apply logins
-            return new ApiResult<IEnumerable<ScoreViewModel>> { Data = topPlayers };
+            var request = await RequestExecutor.ExecuteRequest("/address", new RestRequest("/address", Method.GET)
+                                        .AddHeader("Content-type", "application/json")
+                                        .AddJsonBody(topPlayers.Select(x => x.UserId).ToArrayAsync(CancellationToken.None)));
+            var logins = JsonConvert.DeserializeObject<List<UserViewModel>>(request);
+            if (!logins.Any())
+                return new ApiResult<IEnumerable<ScoreViewModel>> { Error = new Error { } };
+            var result = await topPlayers.ToListAsync(CancellationToken.None);
+            foreach (var score in result)
+            {
+                var currentLogin = logins.FirstOrDefault(_ => _.UserId == score.UserId);
+                if (currentLogin == null)
+                    return new ApiResult<IEnumerable<ScoreViewModel>> { Error = new Error { } };
+                score.Login = currentLogin.UerName;
+            }
+            return new ApiResult<IEnumerable<ScoreViewModel>> { Data = result };
         }
 
         public async Task<ApiResult<ScoreViewModel>> UpdateScore(ScoreParam model)
