@@ -6,9 +6,9 @@ namespace Tamagotchi.Competition.Helpers.API
         public ApiResult()
         { }
 
-        public ApiResult(T result)
+        public ApiResult(T data)
         {
-            Result = result;
+            Data = data;
         }
 
         public ApiResult(Error error)
@@ -16,7 +16,7 @@ namespace Tamagotchi.Competition.Helpers.API
             Error = error;
         }
 
-        public T Result { get; set; }
+        public T Data { get; set; }
         public Error Error { get; set; }
     }
 

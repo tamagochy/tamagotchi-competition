@@ -9,6 +9,8 @@ using Swashbuckle.AspNetCore.Swagger;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Tamagotchi.Competition.AppSettings;
 using Tamagotchi.Competition.Context;
+using Tamagotchi.Competition.Providers.Event;
+using Tamagotchi.Competition.Providers.Score;
 
 namespace Tamagotchi.Competition
 {
@@ -33,6 +35,9 @@ namespace Tamagotchi.Competition
         {
             services.AddDbContext<TamagotchiCompetitionContext>(options =>
                options.UseNpgsql(Configuration.GetConnectionString("DB")));
+            services.AddScoped<TamagotchiCompetitionContext>();
+            services.AddScoped<IScoreProvider, ScoreProvider>();
+            services.AddScoped<IEventProvider, EventProvider>();
             services
                 .AddMvc()
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_0);
