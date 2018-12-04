@@ -12,7 +12,7 @@ namespace Tamagotchi.Competition.Models
         public int Value { get; set; }
     }
 
-    public class ScoreParam
+    public class ScoreParam : ScoreViewModel
     {
         public string ActionCode { get; set; }
         public string RoomCode { get; set; }

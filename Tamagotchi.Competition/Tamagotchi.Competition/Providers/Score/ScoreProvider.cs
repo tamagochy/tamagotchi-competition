@@ -53,9 +53,9 @@ namespace Tamagotchi.Competition.Providers.Score
             return new ApiResult<IEnumerable<ScoreViewModel>> { Data = topPlayers };
         }
 
-        public async Task<ApiResult<ScoreViewModel>> UpdateScore(ScoreViewModel model)
+        public async Task<ApiResult<ScoreViewModel>> UpdateScore(ScoreParam model)
         {
-            var @event = await _eventProvider.GetEvent(null);
+            var @event = await _eventProvider.GetEvent(model);
             var score = await _ctx.Score.Where(x => x.UserId == model.UserId).FirstOrDefaultAsync();
             if (score == null)
                 return new ApiResult<ScoreViewModel> { Error = new Error { } };

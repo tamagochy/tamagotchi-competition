@@ -11,6 +11,6 @@ namespace Tamagotchi.Competition.Providers.Score
     {
         Task<ApiResult<ScoreViewModel>> GetScore(long userId);
         Task<ApiResult<IEnumerable<ScoreViewModel>>> GetTopPlayers(int takeCount);
-        Task<ApiResult<ScoreViewModel>> UpdateScore(ScoreViewModel model);
+        Task<ApiResult<ScoreViewModel>> UpdateScore(ScoreParam model);
     }
 }
