@@ -7,8 +7,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Swashbuckle.AspNetCore.Swagger;
 using Swashbuckle.AspNetCore.SwaggerGen;
-using System;
-using System.IO;
 using Tamagotchi.Competition.AppSettings;
 using Tamagotchi.Competition.Context;
 
@@ -63,6 +61,7 @@ namespace Tamagotchi.Competition
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
+            UpdateDatabase(app);
             if (env.IsDevelopment())
                 app.UseDeveloperExceptionPage();
             else
@@ -83,5 +82,17 @@ namespace Tamagotchi.Competition
             app.UseHttpsRedirection();
             app.UseMvc();
         }
+
+        private void UpdateDatabase(IApplicationBuilder builder)
+        {
+            using (var scope = builder.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
+            {
+                using (var ctx = scope.ServiceProvider.GetService<TamagotchiCompetitionContext>())
+                {
+                    ctx.Database.Migrate();
+                }
+            }
+        }
+
     }
 }

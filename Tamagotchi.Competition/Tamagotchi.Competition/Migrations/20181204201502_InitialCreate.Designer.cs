@@ -10,7 +10,7 @@ using Tamagotchi.Competition.Context;
 namespace Tamagotchi.Competition.Migrations
 {
     [DbContext(typeof(TamagotchiCompetitionContext))]
-    [Migration("20181202212401_InitialCreate")]
+    [Migration("20181204201502_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

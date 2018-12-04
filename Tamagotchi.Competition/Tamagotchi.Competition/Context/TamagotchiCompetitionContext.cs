@@ -5,25 +5,14 @@ namespace Tamagotchi.Competition.Context
     public partial class TamagotchiCompetitionContext : DbContext
     {
         public TamagotchiCompetitionContext()
-        {
-        }
+        { }
 
         public TamagotchiCompetitionContext(DbContextOptions<TamagotchiCompetitionContext> options)
             : base(options)
-        {
-        }
+        { }
 
         public virtual DbSet<Events> Events { get; set; }
         public virtual DbSet<Score> Score { get; set; }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            if (!optionsBuilder.IsConfigured)
-            {
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
-                optionsBuilder.UseSqlServer("Server=desktop-279l8sc\\sqlexpress;Database=tamagotchi-competition;User ID=skipp;Password=skipper5811465;Trusted_Connection=True;App=EFCore&quot;");
-            }
-        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
