@@ -1,12 +1,17 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using Swashbuckle.AspNetCore.Swagger;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using System.Text;
 using Tamagotchi.Competition.AppSettings;
 using Tamagotchi.Competition.Context;
 using Tamagotchi.Competition.Controllers;
@@ -43,6 +48,26 @@ namespace Tamagotchi.Competition
             services
                 .AddMvc()
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_0);
+            IConfigurationSection appConfig = Configuration.GetSection(ConfigSections.APP_CONFIG);
+            services.Configure<AppConfig>(appConfig);
+            var corsBuilder = new CorsPolicyBuilder()
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowAnyOrigin()
+                        .AllowCredentials();
+            services.AddCors(options =>
+            {
+                options.AddPolicy(ConfigSections.CorsPolicy, corsBuilder.Build());
+            });
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration.GetSection(ConfigSections.SecretKey).Value)),
+
+                    };
+                });
             services
                .AddSwaggerGen(c =>
                {
@@ -62,8 +87,7 @@ namespace Tamagotchi.Competition
                    c.CustomSchemaIds(type => type.FriendlyId(true));
                    c.DescribeAllEnumsAsStrings();
                });
-            IConfigurationSection appConfig = Configuration.GetSection(ConfigSections.APP_CONFIG);
-            services.Configure<AppConfig>(appConfig);
+
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
@@ -86,7 +110,7 @@ namespace Tamagotchi.Competition
                });
             loggerFactory.AddConsole(Configuration.GetSection(ConfigSections.LOGGING));
             loggerFactory.AddDebug();
-            //app.UseHttpsRedirection();
+            app.UseCors(ConfigSections.CorsPolicy);
             app.UseMvc();
         }
 
