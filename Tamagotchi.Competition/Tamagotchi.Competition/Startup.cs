@@ -77,6 +77,7 @@ namespace Tamagotchi.Competition
                .UseMvc()
                .UseDefaultFiles()
                .UseStaticFiles()
+               .UseAuthentication()
                .UseSwagger()
                .UseSwaggerUI(c =>
                {

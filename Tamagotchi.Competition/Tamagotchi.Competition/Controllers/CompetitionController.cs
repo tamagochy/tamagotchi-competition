@@ -4,6 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using Tamagotchi.Competition.AppSettings;
 using Tamagotchi.Competition.Helpers.API;
 using Tamagotchi.Competition.Models;
 using Tamagotchi.Competition.Providers.Score;
@@ -16,11 +18,17 @@ namespace Tamagotchi.Competition.Controllers
     public class CompetitionController : ControllerBase
     {
         private readonly IScoreProvider _scoreProvider;
+        private readonly IOptions<AppConfig> _appConfig;
 
-        public CompetitionController(IScoreProvider scoreProvider)
+        public CompetitionController(IScoreProvider scoreProvider, IOptions<AppConfig> appConfig)
         {
             _scoreProvider = scoreProvider;
+            if (appConfig != null)
+                _appConfig = appConfig;
         }
+
+        [HttpGet(nameof(Version))]
+        public ApiResult<VersionViewModel> Version() => new ApiResult<VersionViewModel> { Data = new VersionViewModel { Version = _appConfig.Value.ProjectVersion } };
 
         [HttpGet(nameof(State))]
         public bool State() => true;
