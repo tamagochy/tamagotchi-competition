@@ -6,6 +6,6 @@ namespace Tamagotchi.Competition.AppSettings
         public const string LOGGING = "Logging";
         public const string APP_CONFIG = "AppConfig";
         public const string SecretKey = "AppConfig:SecretKey";
-        public const string CorsPolicy = "AuthCorsPolicy";
+        public const string CORS_POLICY = "AuthCorsPolicy";
     }
 }

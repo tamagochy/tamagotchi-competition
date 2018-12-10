@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -12,6 +14,7 @@ using Tamagotchi.Competition.Providers.Score;
 
 namespace Tamagotchi.Competition.Controllers
 {
+    [EnableCors(ConfigSections.CORS_POLICY)]
     [Route("api/[controller]")]
     [Produces("application/json")]
     [ApiController]
@@ -28,8 +31,16 @@ namespace Tamagotchi.Competition.Controllers
         }
 
         [HttpGet(nameof(Version))]
-        public ApiResult<VersionViewModel> Version() => new ApiResult<VersionViewModel> { Data = new VersionViewModel { Version = _appConfig.Value.ProjectVersion } };
+        public ApiResult<VersionViewModel> Version()
+        {
+            var user = User;
+            return new ApiResult<VersionViewModel> { Data = new VersionViewModel { Version = _appConfig.Value.ProjectVersion } };
+        }
 
+        [Authorize]
+        [HttpPost(nameof(VersionPost))]
+        public ApiResult<VersionViewModel> VersionPost() => new ApiResult<VersionViewModel> { Data = new VersionViewModel { Version = _appConfig.Value.ProjectVersion } };
+        
         [HttpGet(nameof(State))]
         public bool State() => true;
 

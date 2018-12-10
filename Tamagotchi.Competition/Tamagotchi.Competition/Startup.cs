@@ -57,16 +57,21 @@ namespace Tamagotchi.Competition
                         .AllowCredentials();
             services.AddCors(options =>
             {
-                options.AddPolicy(ConfigSections.CorsPolicy, corsBuilder.Build());
+                options.AddPolicy(ConfigSections.CORS_POLICY, corsBuilder.Build());
             });
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration.GetSection(ConfigSections.SecretKey).Value)),
-
-                    };
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = "competition",
+                        ValidAudience = "competition",
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration.GetSection(ConfigSections.SecretKey).Value)),                        
+                    };                 
                 });
             services
                .AddSwaggerGen(c =>
@@ -110,7 +115,7 @@ namespace Tamagotchi.Competition
                });
             loggerFactory.AddConsole(Configuration.GetSection(ConfigSections.LOGGING));
             loggerFactory.AddDebug();
-            app.UseCors(ConfigSections.CorsPolicy);
+            app.UseCors(ConfigSections.CORS_POLICY);
             app.UseMvc();
         }
 
