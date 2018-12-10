@@ -35,8 +35,19 @@ namespace Tamagotchi.Competition.Providers.Score
                 })
                 .ToListAsync(cancellationToken: CancellationToken.None);
             if (scores == null || !scores.Any())
-                return new ApiResult<ScoreViewModel> { Error = new Error { Message = "" } };
+                await CreateUserScoreAsync(userId: userId);
             return new ApiResult<ScoreViewModel> { Data = scores.FirstOrDefault() };
+        }
+
+        private async Task CreateUserScoreAsync(long userId)
+        {
+            var scoreEntity = new Context.Score
+            {
+                UserId = userId,
+                Value = default
+            };
+            _ctx.Score.Add(scoreEntity);
+            await _ctx.SaveChangesAsync(CancellationToken.None);
         }
 
         public async Task<ApiResult<IEnumerable<ScoreViewModel>>> GetTopPlayersAsync(int takeCount)
