@@ -24,7 +24,7 @@ namespace Tamagotchi.Competition.Providers.Score
             _eventProvider = eventProvider;
         }
 
-        public async Task<ApiResult<ScoreViewModel>> GetScore(long userId)
+        public async Task<ApiResult<ScoreViewModel>> GetScoreAsync(long userId)
         {
             var scores = await _ctx.Score.Where(_ => _.UserId == userId)
                 .Select(_ => new ScoreViewModel
@@ -39,7 +39,7 @@ namespace Tamagotchi.Competition.Providers.Score
             return new ApiResult<ScoreViewModel> { Data = scores.FirstOrDefault() };
         }
 
-        public async Task<ApiResult<IEnumerable<ScoreViewModel>>> GetTopPlayers(int takeCount)
+        public async Task<ApiResult<IEnumerable<ScoreViewModel>>> GetTopPlayersAsync(int takeCount)
         {
             var topPlayers = _ctx.Score.Select(_ => new ScoreViewModel
             {
@@ -69,7 +69,7 @@ namespace Tamagotchi.Competition.Providers.Score
             return new ApiResult<IEnumerable<ScoreViewModel>> { Data = result };
         }
 
-        public async Task<ApiResult<ScoreViewModel>> UpdateScore(ScoreParam model)
+        public async Task<ApiResult<ScoreViewModel>> UpdateScoreAsync(ScoreParam model)
         {
             var @event = await _eventProvider.GetEvent(model);
             var score = await _ctx.Score.Where(x => x.UserId == model.UserId).FirstOrDefaultAsync();
