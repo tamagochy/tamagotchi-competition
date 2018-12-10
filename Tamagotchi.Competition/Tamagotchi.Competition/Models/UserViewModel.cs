@@ -6,4 +6,10 @@ namespace Tamagotchi.Competition.Models
         public long UserId { get; set; }
         public string UerName { get; set; }
     }
+
+    public class UserParamModel
+    {
+        public string UserId { get; set; }
+    }
+
 }

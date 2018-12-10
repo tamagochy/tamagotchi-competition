@@ -61,8 +61,6 @@ namespace Tamagotchi.Competition
                    });
                    c.CustomSchemaIds(type => type.FriendlyId(true));
                    c.DescribeAllEnumsAsStrings();
-                   //c.IncludeXmlComments($"{AppContext.BaseDirectory}{Path.DirectorySeparatorChar}{Environment.ApplicationName}.xml");                   
-                   //c.DocumentFilter<BasePathFilter>("/v2");                  
                });
             IConfigurationSection appConfig = Configuration.GetSection(ConfigSections.APP_CONFIG);
             services.Configure<AppConfig>(appConfig);
@@ -85,10 +83,9 @@ namespace Tamagotchi.Competition
                    c.RoutePrefix = "swagger/ui";
                    c.SwaggerEndpoint("/swagger/1.0.0/swagger.json", "Competition API");
                });
-
             loggerFactory.AddConsole(Configuration.GetSection(ConfigSections.LOGGING));
             loggerFactory.AddDebug();
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
             app.UseMvc();
         }
 

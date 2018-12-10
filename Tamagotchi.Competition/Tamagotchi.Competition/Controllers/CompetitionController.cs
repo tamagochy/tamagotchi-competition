@@ -15,23 +15,33 @@ namespace Tamagotchi.Competition.Controllers
     [ApiController]
     public class CompetitionController : ControllerBase
     {
-        private readonly IScoreProvider _scoreProvider;        
+        private readonly IScoreProvider _scoreProvider;
 
         public CompetitionController(IScoreProvider scoreProvider)
         {
             _scoreProvider = scoreProvider;
         }
 
-        [HttpGet]
+        [HttpGet(nameof(State))]
+        public bool State() => true;
+
+        [HttpGet(nameof(GetScore))]
         [ProducesResponseType(typeof(ApiResult<ScoreViewModel>), 400)]
         [ProducesResponseType(typeof(ApiResult<ScoreViewModel>), 200)]
-        public async Task<ApiResult<ScoreViewModel>> GetScore([FromHeader]long userId)
+        public async Task<ApiResult<ScoreViewModel>> GetScore([FromHeader]string user_id)
         {
-            var score = await _scoreProvider.GetScoreAsync(userId);
-            return score;
+            if (long.TryParse(user_id, out long userId))
+            {
+                var score = await _scoreProvider.GetScoreAsync(userId == default ? -1 : userId);
+                return score;
+            }
+            else
+            {
+                return new ApiResult<ScoreViewModel> { Error = new Error { Message = "oups" } };
+            }
         }
 
-        [HttpGet]
+        [HttpGet(nameof(GetTopPlayers))]
         [ProducesResponseType(typeof(ApiResult<ScoreViewModel>), 400)]
         [ProducesResponseType(typeof(ApiResult<ScoreViewModel>), 200)]
         public async Task<ApiResult<IEnumerable<ScoreViewModel>>> GetTopPlayers()
@@ -43,6 +53,7 @@ namespace Tamagotchi.Competition.Controllers
         [Consumes("application/json")]
         [ProducesResponseType(typeof(ApiResult<ScoreViewModel>), 400)]
         [ProducesResponseType(typeof(ApiResult<ScoreViewModel>), 200)]
+        [HttpPut(nameof(ChangeScore))]
         public async Task<ApiResult<ScoreViewModel>> ChangeScore([FromBody]ScoreParam model)
         {
             var result = await _scoreProvider.UpdateScoreAsync(model);
