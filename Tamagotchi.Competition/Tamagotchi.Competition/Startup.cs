@@ -9,6 +9,7 @@ using Swashbuckle.AspNetCore.Swagger;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Tamagotchi.Competition.AppSettings;
 using Tamagotchi.Competition.Context;
+using Tamagotchi.Competition.Controllers;
 using Tamagotchi.Competition.Providers.Event;
 using Tamagotchi.Competition.Providers.Score;
 
@@ -38,6 +39,7 @@ namespace Tamagotchi.Competition
             services.AddScoped<TamagotchiCompetitionContext>();
             services.AddScoped<IScoreProvider, ScoreProvider>();
             services.AddScoped<IEventProvider, EventProvider>();
+            services.AddScoped<CompetitionController>();
             services
                 .AddMvc()
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_0);
@@ -62,6 +64,8 @@ namespace Tamagotchi.Competition
                    //c.IncludeXmlComments($"{AppContext.BaseDirectory}{Path.DirectorySeparatorChar}{Environment.ApplicationName}.xml");                   
                    //c.DocumentFilter<BasePathFilter>("/v2");                  
                });
+            IConfigurationSection appConfig = Configuration.GetSection(ConfigSections.APP_CONFIG);
+            services.Configure<AppConfig>(appConfig);
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
