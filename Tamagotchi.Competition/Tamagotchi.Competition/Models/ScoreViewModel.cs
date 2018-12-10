@@ -1,13 +1,14 @@
-﻿
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using System;
 
 namespace Tamagotchi.Competition.Models
 {
     public class ScoreViewModel
     {
+        [JsonIgnore]
         public long ScoreId { get; set; }
-        public long UserId { get; set; }        
+        public long UserId { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string Login { get; set; }
         public int Value { get; set; }
     }

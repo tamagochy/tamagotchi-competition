@@ -1,4 +1,5 @@
-﻿
+﻿using Newtonsoft.Json;
+
 namespace Tamagotchi.Competition.Helpers.API
 {
     public class ApiResult<T> where T : class
@@ -16,7 +17,9 @@ namespace Tamagotchi.Competition.Helpers.API
             Error = error;
         }
 
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public T Data { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public Error Error { get; set; }
     }
 
