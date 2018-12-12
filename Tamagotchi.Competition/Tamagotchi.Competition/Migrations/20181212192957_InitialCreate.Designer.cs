@@ -10,7 +10,7 @@ using Tamagotchi.Competition.Context;
 namespace Tamagotchi.Competition.Migrations
 {
     [DbContext(typeof(TamagotchiCompetitionContext))]
-    [Migration("20181204201502_InitialCreate")]
+    [Migration("20181212192957_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -18,7 +18,7 @@ namespace Tamagotchi.Competition.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn)
-                .HasAnnotation("ProductVersion", "2.1.4-rtm-31024")
+                .HasAnnotation("ProductVersion", "2.2.0-rtm-35687")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             modelBuilder.Entity("Tamagotchi.Competition.Context.Events", b =>

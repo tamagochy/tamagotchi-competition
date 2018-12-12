@@ -3,11 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28010.2050
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tamagotchi.Competition", "Tamagotchi.Competition\Tamagotchi.Competition.csproj", "{BBABBEB9-5368-4DAB-9D9A-9DF1DF5F6F2C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tamagotchi.Competition", "Tamagotchi.Competition\Tamagotchi.Competition.csproj", "{D853BCEE-7C44-4B40-8D6E-9DA622C0F1F1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tamagotchi.Competition.Helpers", "Tamagotchi.Competition.Helpers\Tamagotchi.Competition.Helpers.csproj", "{1798A21F-EE7F-445B-B592-4C0B6B78C02F}"
-EndProject
-Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{57B54368-FFD1-4BB2-8FC2-57ED75D6E1C3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tamagotchi.Competition.Helpers", "Tamagotchi.Competition.Helpers\Tamagotchi.Competition.Helpers.csproj", "{32CF9308-D1AC-4FDE-92C6-72BF58B59571}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,23 +13,19 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{BBABBEB9-5368-4DAB-9D9A-9DF1DF5F6F2C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BBABBEB9-5368-4DAB-9D9A-9DF1DF5F6F2C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BBABBEB9-5368-4DAB-9D9A-9DF1DF5F6F2C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BBABBEB9-5368-4DAB-9D9A-9DF1DF5F6F2C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1798A21F-EE7F-445B-B592-4C0B6B78C02F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1798A21F-EE7F-445B-B592-4C0B6B78C02F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1798A21F-EE7F-445B-B592-4C0B6B78C02F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1798A21F-EE7F-445B-B592-4C0B6B78C02F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{57B54368-FFD1-4BB2-8FC2-57ED75D6E1C3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{57B54368-FFD1-4BB2-8FC2-57ED75D6E1C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{57B54368-FFD1-4BB2-8FC2-57ED75D6E1C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{57B54368-FFD1-4BB2-8FC2-57ED75D6E1C3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D853BCEE-7C44-4B40-8D6E-9DA622C0F1F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D853BCEE-7C44-4B40-8D6E-9DA622C0F1F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D853BCEE-7C44-4B40-8D6E-9DA622C0F1F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D853BCEE-7C44-4B40-8D6E-9DA622C0F1F1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{32CF9308-D1AC-4FDE-92C6-72BF58B59571}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{32CF9308-D1AC-4FDE-92C6-72BF58B59571}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{32CF9308-D1AC-4FDE-92C6-72BF58B59571}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{32CF9308-D1AC-4FDE-92C6-72BF58B59571}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {D5D8AB5B-F17A-4E31-804A-04E794979206}
+		SolutionGuid = {393D9478-6E64-402D-AAC8-4A7AA7D25693}
 	EndGlobalSection
 EndGlobal

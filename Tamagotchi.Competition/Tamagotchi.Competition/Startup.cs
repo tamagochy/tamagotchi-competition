@@ -1,8 +1,12 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,7 +15,6 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Swashbuckle.AspNetCore.Swagger;
 using Swashbuckle.AspNetCore.SwaggerGen;
-using System.Text;
 using Tamagotchi.Competition.AppSettings;
 using Tamagotchi.Competition.Context;
 using Tamagotchi.Competition.Controllers;
@@ -39,15 +42,27 @@ namespace Tamagotchi.Competition
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+           .AddJwtBearer(options =>
+           {
+               options.TokenValidationParameters = new TokenValidationParameters
+               {
+                   ValidateIssuer = true,
+                   ValidateAudience = true,
+                   ValidateLifetime = true,
+                   ValidateIssuerSigningKey = true,
+
+                   ValidIssuer = "tama.gotchi",
+                   ValidAudience = "tama.gotchi",
+                   IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("TamagotchiSecretKey"))
+               };
+           });
             services.AddDbContext<TamagotchiCompetitionContext>(options =>
-               options.UseNpgsql(Configuration.GetConnectionString("DB")));
+              options.UseNpgsql(Configuration.GetConnectionString("DB")));
             services.AddScoped<TamagotchiCompetitionContext>();
             services.AddScoped<IScoreProvider, ScoreProvider>();
             services.AddScoped<IEventProvider, EventProvider>();
             services.AddScoped<CompetitionController>();
-            services
-                .AddMvc()
-                .SetCompatibilityVersion(CompatibilityVersion.Version_2_0);
             IConfigurationSection appConfig = Configuration.GetSection(ConfigSections.APP_CONFIG);
             services.Configure<AppConfig>(appConfig);
             var corsBuilder = new CorsPolicyBuilder()
@@ -59,20 +74,6 @@ namespace Tamagotchi.Competition
             {
                 options.AddPolicy(ConfigSections.CORS_POLICY, corsBuilder.Build());
             });
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options =>
-                {
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuer = true,
-                        ValidateAudience = true,
-                        ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true,
-                        ValidIssuer = "competition",
-                        ValidAudience = "competition",
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration.GetSection(ConfigSections.SecretKey).Value)),                        
-                    };                 
-                });
             services
                .AddSwaggerGen(c =>
                {
@@ -92,22 +93,20 @@ namespace Tamagotchi.Competition
                    c.CustomSchemaIds(type => type.FriendlyId(true));
                    c.DescribeAllEnumsAsStrings();
                });
-
+            services.AddMvc();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
-            UpdateDatabase(app);
             if (env.IsDevelopment())
+            {
                 app.UseDeveloperExceptionPage();
-            else
-                app.UseHsts();
-            app
-               .UseMvc()
-               .UseDefaultFiles()
-               .UseStaticFiles()
-               .UseAuthentication()
-               .UseSwagger()
+            }
+            app.UseAuthentication();
+            UpdateDatabase(app);
+            app.UseDefaultFiles();
+            app.UseStaticFiles();
+            app.UseSwagger()
                .UseSwaggerUI(c =>
                {
                    c.RoutePrefix = "swagger/ui";
