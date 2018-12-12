@@ -70,19 +70,19 @@ namespace Tamagotchi.Competition.Providers.Score
             .OrderBy(x => x.Value)
             .Take(takeCount);
             if (!await topPlayers.AnyAsync())
-                return new ApiResult<IEnumerable<ScoreViewModel>> { Error = new Error { } };
+                return new ApiResult<IEnumerable<ScoreViewModel>> { Errors = new List<Error> { new Error { Message = "" } } };
             var request = await RequestExecutor.ExecuteRequest("/address", new RestRequest("/address", Method.GET)
                                         .AddHeader("Content-type", "application/json")
                                         .AddJsonBody(topPlayers.Select(x => x.UserId).ToArrayAsync(CancellationToken.None)));
             var logins = JsonConvert.DeserializeObject<List<UserViewModel>>(request);
             if (!logins.Any())
-                return new ApiResult<IEnumerable<ScoreViewModel>> { Error = new Error { } };
+                return new ApiResult<IEnumerable<ScoreViewModel>> { Errors = new List<Error> { new Error { Message = "" } } };
             var result = await topPlayers.ToListAsync(CancellationToken.None);
             foreach (var score in result)
             {
                 var currentLogin = logins.FirstOrDefault(_ => _.UserId == score.UserId);
                 if (currentLogin == null)
-                    return new ApiResult<IEnumerable<ScoreViewModel>> { Error = new Error { } };
+                    return new ApiResult<IEnumerable<ScoreViewModel>> { Errors = new List<Error> { new Error { Message = "" } } };
                 score.Login = currentLogin.UerName;
             }
             return new ApiResult<IEnumerable<ScoreViewModel>> { Data = result };
@@ -93,7 +93,7 @@ namespace Tamagotchi.Competition.Providers.Score
             var @event = await _eventProvider.GetEvent(model);
             var score = await _ctx.Score.Where(x => x.UserId == model.UserId).FirstOrDefaultAsync();
             if (score == null)
-                return new ApiResult<ScoreViewModel> { Error = new Error { } };
+                return new ApiResult<ScoreViewModel> { Errors = new List<Error> { new Error { Message = "" } } };
             @event.Value += model.Value;
             await _ctx.SaveChangesAsync(CancellationToken.None);
             return new ApiResult<ScoreViewModel> { Data = { } };

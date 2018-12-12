@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
@@ -8,6 +9,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Tamagotchi.Competition.AppSettings;
+using Tamagotchi.Competition.Consts;
 using Tamagotchi.Competition.Helpers.API;
 using Tamagotchi.Competition.Models;
 using Tamagotchi.Competition.Providers.Score;
@@ -16,7 +18,7 @@ namespace Tamagotchi.Competition.Controllers
 {
     [EnableCors(ConfigSections.CORS_POLICY)]
     [Route("api/[controller]")]
-    [Produces("application/json")]   
+    [Produces("application/json")]
     public class CompetitionController : ControllerBase
     {
         private readonly IScoreProvider _scoreProvider;
@@ -39,23 +41,31 @@ namespace Tamagotchi.Competition.Controllers
         [Authorize]
         [HttpPost(nameof(VersionPost))]
         public ApiResult<VersionViewModel> VersionPost() => new ApiResult<VersionViewModel> { Data = new VersionViewModel { Version = _appConfig.Value.ProjectVersion } };
-        
+
         [HttpGet(nameof(State))]
         public bool State() => true;
 
         [HttpGet(nameof(GetScore))]
         [ProducesResponseType(typeof(ApiResult<ScoreViewModel>), 400)]
         [ProducesResponseType(typeof(ApiResult<ScoreViewModel>), 200)]
-        public async Task<ApiResult<ScoreViewModel>> GetScore([FromHeader]string user_id)
+        public async Task<ApiResult<ScoreViewModel>> GetScore()
         {
-            if (long.TryParse(user_id, out long userId))
+            if (User == null)
+                return new ApiResult<ScoreViewModel> { Errors = new List<Error> { new Error { Message = "" } } };
+            var claim = User.Claims
+                            .Where(_ => _.Type.Equals(AppConsts.USER_ID))
+                            .Select(_ => _.Value)
+                            .FirstOrDefault();
+            if(string.IsNullOrWhiteSpace(claim))
+                return new ApiResult<ScoreViewModel> { Errors = new List<Error> { new Error { Message = "" } } };
+            if (long.TryParse(claim, out long userId))
             {
                 var score = await _scoreProvider.GetScoreAsync(userId == default ? -1 : userId);
                 return score;
             }
             else
             {
-                return new ApiResult<ScoreViewModel> { Error = new Error { Message = "oups" } };
+                return new ApiResult<ScoreViewModel> { Errors = new List<Error> { new Error { Message = "" } } };
             }
         }
 

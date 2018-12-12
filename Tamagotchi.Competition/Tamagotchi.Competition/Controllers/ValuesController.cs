@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Tamagotchi.Competition.AppSettings;
+using Tamagotchi.Competition.Consts;
 
 namespace Tamagotchi.Competition.Controllers
 {
@@ -19,6 +20,7 @@ namespace Tamagotchi.Competition.Controllers
         public JsonResult PostAction()
         {
             var user = User;
+            var claim = User.Claims.Where(_ => _.Type.Equals(AppConsts.USER_ID)).Select(_ => _.Value).FirstOrDefault();
             return new JsonResult(user);
         }
 
