@@ -14,10 +14,9 @@ using Tamagotchi.Competition.Providers.Score;
 
 namespace Tamagotchi.Competition.Controllers
 {
-    //[EnableCors(ConfigSections.CORS_POLICY)]
+    [EnableCors(ConfigSections.CORS_POLICY)]
     [Route("api/[controller]")]
-    //[Produces("application/json")]
-    //[ApiController]
+    [Produces("application/json")]   
     public class CompetitionController : ControllerBase
     {
         private readonly IScoreProvider _scoreProvider;
