@@ -10,7 +10,7 @@ namespace Tamagotchi.Competition.Providers.Score
     public interface IScoreProvider
     {
         Task<ApiResult<ScoreViewModel>> GetScoreAsync(long userId);
-        Task<ApiResult<IEnumerable<ScoreViewModel>>> GetTopPlayersAsync(int takeCount);
+        Task<ApiResult<IEnumerable<ScoreViewModel>>> GetTopPlayersAsync();
         Task<ApiResult<ScoreViewModel>> UpdateScoreAsync(ScoreParam model);
     }
 }

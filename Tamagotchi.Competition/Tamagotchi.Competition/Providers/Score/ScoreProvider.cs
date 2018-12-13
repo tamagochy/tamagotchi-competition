@@ -1,10 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using RestSharp;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Tamagotchi.Competition.AppSettings;
 using Tamagotchi.Competition.Context;
 using Tamagotchi.Competition.Helpers.API;
 using Tamagotchi.Competition.Helpers.Rest;
@@ -17,11 +20,13 @@ namespace Tamagotchi.Competition.Providers.Score
     {
         private readonly TamagotchiCompetitionContext _ctx;
         private readonly IEventProvider _eventProvider;
+        private readonly IOptions<AppConfig> _appConfig;
 
-        public ScoreProvider(TamagotchiCompetitionContext ctx, IEventProvider eventProvider)
+        public ScoreProvider(TamagotchiCompetitionContext ctx, IEventProvider eventProvider, IOptions<AppConfig> appConfig)
         {
             _ctx = ctx;
             _eventProvider = eventProvider;
+            _appConfig = appConfig;
         }
 
         public async Task<ApiResult<ScoreViewModel>> GetScoreAsync(long userId)
@@ -29,13 +34,16 @@ namespace Tamagotchi.Competition.Providers.Score
             var scores = await _ctx.Score.Where(_ => _.UserId == userId)
                 .Select(_ => new ScoreViewModel
                 {
-                    ScoreId = _.Id,
-                    UserId = _.UserId,
+                    ScoreId = default(long?),
+                    UserId = default(long?),
                     Value = _.Value
                 })
                 .ToListAsync(cancellationToken: CancellationToken.None);
             if (scores == null || !scores.Any())
+            {
                 await CreateUserScoreAsync(userId: userId);
+                return await GetScoreAsync(userId);
+            }
             return new ApiResult<ScoreViewModel> { Data = scores.FirstOrDefault() };
         }
 
@@ -58,32 +66,36 @@ namespace Tamagotchi.Competition.Providers.Score
             };
         }
 
-        public async Task<ApiResult<IEnumerable<ScoreViewModel>>> GetTopPlayersAsync(int takeCount)
+        public async Task<ApiResult<IEnumerable<ScoreViewModel>>> GetTopPlayersAsync()
         {
             var topPlayers = _ctx.Score.Select(_ => new ScoreViewModel
             {
                 Login = default,
-                ScoreId = _.Id,
+                ScoreId = default(long?),
                 UserId = _.UserId,
                 Value = _.Value
             })
             .OrderBy(x => x.Value)
-            .Take(takeCount);
+            .Take(_appConfig.Value.CountTopPlayers);
             if (!await topPlayers.AnyAsync())
-                return new ApiResult<IEnumerable<ScoreViewModel>> { Errors = new List<Error> { new Error { Message = "" } } };
-            var request = await RequestExecutor.ExecuteRequest("/address", new RestRequest("/address", Method.GET)
+                return new ApiResult<IEnumerable<ScoreViewModel>> { Data = new List<ScoreViewModel>() };
+            var url = _appConfig.Value.AuthBaseUrl;
+            url += "getUserLogins";
+            var ids = await topPlayers.Select(___ => ___.UserId).ToArrayAsync(CancellationToken.None);
+            var jarr = JArray.FromObject(ids);
+            var request = await RequestExecutor.ExecuteRequest(url, new RestRequest(url, Method.POST)
                                         .AddHeader("Content-type", "application/json")
-                                        .AddJsonBody(topPlayers.Select(x => x.UserId).ToArrayAsync(CancellationToken.None)));
-            var logins = JsonConvert.DeserializeObject<List<UserViewModel>>(request);
-            if (!logins.Any())
-                return new ApiResult<IEnumerable<ScoreViewModel>> { Errors = new List<Error> { new Error { Message = "" } } };
+                                        .AddJsonBody(ids.Where(_ => _.HasValue).Select(_ => _.Value).ToArray()));
+            var logins = JsonConvert.DeserializeObject<BaseAuthEntity>(request);
+            if (!logins.Users.Any())
+                return new ApiResult<IEnumerable<ScoreViewModel>> { Data = new List<ScoreViewModel>() };
             var result = await topPlayers.ToListAsync(CancellationToken.None);
             foreach (var score in result)
             {
-                var currentLogin = logins.FirstOrDefault(_ => _.UserId == score.UserId);
+                var currentLogin = logins.Users.FirstOrDefault(_ => _.UserId == score.UserId);
                 if (currentLogin == null)
                     return new ApiResult<IEnumerable<ScoreViewModel>> { Errors = new List<Error> { new Error { Message = "" } } };
-                score.Login = currentLogin.UerName;
+                score.Login = currentLogin.Login;
             }
             return new ApiResult<IEnumerable<ScoreViewModel>> { Data = result };
         }

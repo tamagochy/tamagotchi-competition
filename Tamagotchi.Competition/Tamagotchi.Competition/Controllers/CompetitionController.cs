@@ -48,33 +48,42 @@ namespace Tamagotchi.Competition.Controllers
         [HttpGet(nameof(GetScore))]
         [ProducesResponseType(typeof(ApiResult<ScoreViewModel>), 400)]
         [ProducesResponseType(typeof(ApiResult<ScoreViewModel>), 200)]
+        [Authorize]
         public async Task<ApiResult<ScoreViewModel>> GetScore()
         {
             if (User == null)
-                return new ApiResult<ScoreViewModel> { Errors = new List<Error> { new Error { Message = "" } } };
+                return new ApiResult<ScoreViewModel>() { Errors = new List<Error> { new Error { Message = ErrorCodes.UNAUTHORIZED } } };
             var claim = User.Claims
                             .Where(_ => _.Type.Equals(AppConsts.USER_ID))
                             .Select(_ => _.Value)
                             .FirstOrDefault();
-            if(string.IsNullOrWhiteSpace(claim))
-                return new ApiResult<ScoreViewModel> { Errors = new List<Error> { new Error { Message = "" } } };
+            if (string.IsNullOrWhiteSpace(claim))
+                return new ApiResult<ScoreViewModel>() { Errors = new List<Error> { new Error { Message = ErrorCodes.UNAUTHORIZED } } };
             if (long.TryParse(claim, out long userId))
             {
-                var score = await _scoreProvider.GetScoreAsync(userId == default ? -1 : userId);
-                return score;
+                return await _scoreProvider.GetScoreAsync(userId == default ? 0 : userId);
             }
             else
             {
-                return new ApiResult<ScoreViewModel> { Errors = new List<Error> { new Error { Message = "" } } };
+                return new ApiResult<ScoreViewModel>() { Errors = new List<Error> { new Error { Message = ErrorCodes.PROTOCOL_INCORRECT } } };
             }
         }
 
         [HttpGet(nameof(GetTopPlayers))]
         [ProducesResponseType(typeof(ApiResult<ScoreViewModel>), 400)]
         [ProducesResponseType(typeof(ApiResult<ScoreViewModel>), 200)]
+        [Authorize]
         public async Task<ApiResult<IEnumerable<ScoreViewModel>>> GetTopPlayers()
         {
-            var topPlayers = await _scoreProvider.GetTopPlayersAsync(10);
+            ApiResult<IEnumerable<ScoreViewModel>> topPlayers = null;
+            try
+            {
+                topPlayers = await _scoreProvider.GetTopPlayersAsync();
+            }
+            catch (Exception)
+            {
+                return new ApiResult<IEnumerable<ScoreViewModel>>() { Errors = new List<Error> { new Error { Message = ErrorCodes.SERVER_ERROR } } };
+            }
             return topPlayers;
         }
 

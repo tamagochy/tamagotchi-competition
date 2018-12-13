@@ -11,5 +11,6 @@ namespace Tamagotchi.Competition.AppSettings
         public string SecretKey { get; set; }    
         public string ApplicationEmail { get; set; }        
         public string EmailPassword { get; set; }
+        public string AuthBaseUrl { get; set; }
     }
 }
