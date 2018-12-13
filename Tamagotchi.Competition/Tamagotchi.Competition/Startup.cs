@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Hosting;
@@ -11,10 +8,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Swashbuckle.AspNetCore.Swagger;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using Tamagotchi.Competition.Accessor;
 using Tamagotchi.Competition.AppSettings;
 using Tamagotchi.Competition.Context;
 using Tamagotchi.Competition.Controllers;
@@ -47,18 +44,17 @@ namespace Tamagotchi.Competition
            {
                options.TokenValidationParameters = new TokenValidationParameters
                {
-                   ValidateIssuer = true,
-                   ValidateAudience = true,
+                   ValidateIssuer = false,
+                   ValidateAudience = false,
+
                    ValidateLifetime = true,
                    ValidateIssuerSigningKey = true,
 
-                   ValidIssuer = "tama.gotchi",
-                   ValidAudience = "tama.gotchi",
-                   IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("TamagotchiSecretKey"))
+                   IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration.GetSection(ConfigSections.SecretKey).Value))
                };
            });
             services.AddDbContext<TamagotchiCompetitionContext>(options =>
-              options.UseNpgsql(Configuration.GetConnectionString("DB")));
+              options.UseNpgsql(Configuration.GetConnectionString(ConfigSections.DATABASE)));
             services.AddScoped<TamagotchiCompetitionContext>();
             services.AddScoped<IScoreProvider, ScoreProvider>();
             services.AddScoped<IEventProvider, EventProvider>();
@@ -92,8 +88,12 @@ namespace Tamagotchi.Competition
                    });
                    c.CustomSchemaIds(type => type.FriendlyId(true));
                    c.DescribeAllEnumsAsStrings();
-               });
-            services.AddMvc();
+               });         
+            services.AddMvc(options =>
+            {
+                // All endpoints need authorization using our custom authorization filter
+                options.Filters.Add(new AuthAccessor(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build()));
+            });
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)

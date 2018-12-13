@@ -17,6 +17,7 @@ namespace Tamagotchi.Competition.Controllers
 
         [HttpPost(nameof(PostAction))]
         [Authorize]
+        //[AuthAccessor]
         public JsonResult PostAction()
         {
             var user = User;

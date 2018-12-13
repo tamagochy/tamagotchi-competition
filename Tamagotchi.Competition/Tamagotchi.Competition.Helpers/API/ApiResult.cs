@@ -26,7 +26,10 @@ namespace Tamagotchi.Competition.Helpers.API
 
     public class Error
     {
+        [JsonProperty("code", NullValueHandling = NullValueHandling.Ignore)]
         public string Message { get; set; }
+        [JsonProperty("attr", NullValueHandling = NullValueHandling.Ignore)]
+        public string Attribute { get; set; }
     }
 
     public class Error<T> : Error where T : class
