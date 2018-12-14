@@ -3,11 +3,13 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RestSharp;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Tamagotchi.Competition.AppSettings;
+using Tamagotchi.Competition.Consts;
 using Tamagotchi.Competition.Context;
 using Tamagotchi.Competition.Helpers.API;
 using Tamagotchi.Competition.Helpers.Rest;
@@ -100,15 +102,33 @@ namespace Tamagotchi.Competition.Providers.Score
             return new ApiResult<IEnumerable<ScoreViewModel>> { Data = result };
         }
 
-        public async Task<ApiResult<ScoreViewModel>> UpdateScoreAsync(ScoreParam model)
+        public async Task<ApiResult<SuccessResult>> UpdateScoreAsync(ScoreParam model)
         {
+            ValidateUpdateScoreModel(model);
             var @event = await _eventProvider.GetEvent(model);
             var score = await _ctx.Score.Where(x => x.UserId == model.UserId).FirstOrDefaultAsync();
             if (score == null)
-                return new ApiResult<ScoreViewModel> { Errors = new List<Error> { new Error { Message = "" } } };
-            @event.Value += model.Value;
+                return new ApiResult<SuccessResult> { Errors = new List<Error> { new Error { Message = ErrorCodes.BUSSINESS_CODE_EVENT_NOT_FOUND } } };
+            score.Value += @event.Data.Value;// += model.Value;
             await _ctx.SaveChangesAsync(CancellationToken.None);
-            return new ApiResult<ScoreViewModel> { Data = { } };
+            return new ApiResult<SuccessResult> { Data = { } };
+        }
+
+        private ApiResult<ScoreViewModel> ValidateUpdateScoreModel(ScoreParam model)
+        {
+            var errorResults = new List<Error>();
+            var apiResult = new ApiResult<ScoreViewModel>() { Errors = new List<Error>(errorResults) };
+            if (!DateTime.TryParse(model.Time, out DateTime result))
+                errorResults.Add(new Error { Message = ErrorCodes.PROTOCOL_INCORRECT });
+            else
+                model.EventDate = result;
+            if (string.IsNullOrWhiteSpace(model.ActionCode))
+                errorResults.Add(new Error { Attribute = "actionCode", Message = ErrorCodes.VALIDATION_MISSING });
+            if (string.IsNullOrWhiteSpace(model.RoomCode))
+                errorResults.Add(new Error { Attribute = "roomCode", Message = ErrorCodes.VALIDATION_MISSING });
+            if (string.IsNullOrWhiteSpace(model.Time))
+                errorResults.Add(new Error { Attribute = "time", Message = ErrorCodes.VALIDATION_MISSING });
+            return new ApiResult<ScoreViewModel>() { Errors = new List<Error>(errorResults) };
         }
 
     }

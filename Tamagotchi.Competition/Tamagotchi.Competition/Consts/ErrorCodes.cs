@@ -8,7 +8,7 @@ namespace Tamagotchi.Competition.Consts
         public static string UNAUTHORIZED = "https://i.ytimg.com/vi/qkudeorV03o/maxresdefault.jpg";
         public static string NOT_FOUND = "url.NotFound";
         public static string VALIDATION_MISSING = "validation.Missing";
-        public static string BUSSINESS_CODE = "bussiness.{0}";
-
+        public static string BUSSINESS_CODE_SCORE_NOT_FOUND = "bussiness.ScoreNotFound";
+        public static string BUSSINESS_CODE_EVENT_NOT_FOUND = "bussiness.EventNotFound";
     }
 }

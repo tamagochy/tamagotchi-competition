@@ -15,11 +15,12 @@ namespace Tamagotchi.Competition.Models
     }
 
     public class ScoreParam : ScoreViewModel
-    {
+    {       
         public string ActionCode { get; set; }
         public string RoomCode { get; set; }
         public string DeseaseCode { get; set; }
-        public DateTime Time { get; set; }
+        public string Time { get; set; }
+        public DateTime EventDate { get; set; }
     }
 
 }

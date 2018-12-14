@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json.Linq;
 using Tamagotchi.Competition.AppSettings;
 using Tamagotchi.Competition.Consts;
 using Tamagotchi.Competition.Helpers.API;
@@ -90,11 +91,33 @@ namespace Tamagotchi.Competition.Controllers
         [Consumes("application/json")]
         [ProducesResponseType(typeof(ApiResult<ScoreViewModel>), 400)]
         [ProducesResponseType(typeof(ApiResult<ScoreViewModel>), 200)]
+        [Authorize]
         [HttpPut(nameof(ChangeScore))]
-        public async Task<ApiResult<ScoreViewModel>> ChangeScore([FromBody]ScoreParam model)
+        public async Task<ApiResult<SuccessResult>> ChangeScore([FromBody]JObject model)
         {
-            var result = await _scoreProvider.UpdateScoreAsync(model);
-            return result;
+            var apiResult = new ApiResult<SuccessResult>();
+            try
+            {
+                if (User == null)
+                    return new ApiResult<SuccessResult>() { Errors = new List<Error> { new Error { Message = ErrorCodes.UNAUTHORIZED } } };
+                var claim = User.Claims
+                                .Where(_ => _.Type.Equals(AppConsts.USER_ID))
+                                .Select(_ => _.Value)
+                                .FirstOrDefault();
+                if (string.IsNullOrWhiteSpace(claim))
+                    return new ApiResult<SuccessResult>() { Errors = new List<Error> { new Error { Message = ErrorCodes.UNAUTHORIZED } } };
+                var scoreParam = model.ToObject<ScoreParam>();
+                if (long.TryParse(claim, out long userId))
+                    scoreParam.UserId = userId;
+                else
+                    return new ApiResult<SuccessResult>() { Errors = new List<Error> { new Error { Message = ErrorCodes.PROTOCOL_INCORRECT } } };
+                apiResult = await _scoreProvider.UpdateScoreAsync(scoreParam);
+            }
+            catch (Exception)
+            {
+                return new ApiResult<SuccessResult> { Errors = new List<Error> { new Error { Message = ErrorCodes.PROTOCOL_INCORRECT } } };
+            }
+            return apiResult;
         }
 
     }
