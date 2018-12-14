@@ -1,0 +1,8 @@
+version: '3.4'
+
+services:
+  tamagotchi.competition:
+    image: ${DOCKER_REGISTRY}tamagotchicompetition
+    build:
+      context: .
+      dockerfile: Tamagotchi.Competition/Dockerfile
