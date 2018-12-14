@@ -18,7 +18,7 @@ using Tamagotchi.Competition.Providers.Score;
 namespace Tamagotchi.Competition.Controllers
 {
     [EnableCors(ConfigSections.CORS_POLICY)]
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [Produces("application/json")]
     public class CompetitionController : ControllerBase
     {
@@ -32,21 +32,14 @@ namespace Tamagotchi.Competition.Controllers
                 _appConfig = appConfig;
         }
 
-        [HttpGet(nameof(Version))]
+        [HttpGet("version")]
         public ApiResult<VersionViewModel> Version()
         {
             var user = User;
             return new ApiResult<VersionViewModel> { Data = new VersionViewModel { Version = _appConfig.Value.ProjectVersion } };
         }
 
-        [Authorize]
-        [HttpPost(nameof(VersionPost))]
-        public ApiResult<VersionViewModel> VersionPost() => new ApiResult<VersionViewModel> { Data = new VersionViewModel { Version = _appConfig.Value.ProjectVersion } };
-
-        [HttpGet(nameof(State))]
-        public bool State() => true;
-
-        [HttpGet(nameof(GetScore))]
+        [HttpGet("getScore")]
         [ProducesResponseType(typeof(ApiResult<ScoreViewModel>), 400)]
         [ProducesResponseType(typeof(ApiResult<ScoreViewModel>), 200)]
         [Authorize]
@@ -70,7 +63,7 @@ namespace Tamagotchi.Competition.Controllers
             }
         }
 
-        [HttpGet(nameof(GetTopPlayers))]
+        [HttpGet("getTopPlayers")]
         [ProducesResponseType(typeof(ApiResult<ScoreViewModel>), 400)]
         [ProducesResponseType(typeof(ApiResult<ScoreViewModel>), 200)]
         [Authorize]
@@ -92,7 +85,7 @@ namespace Tamagotchi.Competition.Controllers
         [ProducesResponseType(typeof(ApiResult<ScoreViewModel>), 400)]
         [ProducesResponseType(typeof(ApiResult<ScoreViewModel>), 200)]
         [Authorize]
-        [HttpPut(nameof(ChangeScore))]
+        [HttpPut("changeScore")]
         public async Task<ApiResult<SuccessResult>> ChangeScore([FromBody]JObject model)
         {
             var apiResult = new ApiResult<SuccessResult>();
