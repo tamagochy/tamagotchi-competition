@@ -4,15 +4,15 @@ EXPOSE 80
 
 FROM microsoft/aspnetcore-build:2.0 AS build
 WORKDIR /src
-COPY ["Tamagotchi.Competition/Tamagotchi.Competition.csproj", "Tamagotchi.Competition/"]
-COPY ["Tamagotchi.Competition.Helpers/Tamagotchi.Competition.Helpers.csproj", "Tamagotchi.Competition.Helpers/"]
-RUN dotnet restore "Tamagotchi.Competition/Tamagotchi.Competition.csproj"
+COPY /Tamagotchi.Competition/Tamagotchi.Competition.csproj Tamagotchi.Competition/
+COPY /Tamagotchi.Competition.Helpers/Tamagotchi.Competition.Helpers.csproj Tamagotchi.Competition.Helpers/
+RUN dotnet restore Tamagotchi.Competition/Tamagotchi.Competition.csproj
+WORKDIR /src/Tamagotchi.Competition
 COPY . .
-WORKDIR "/src/Tamagotchi.Competition"
-RUN dotnet build "Tamagotchi.Competition.csproj" -c Release -o /app
+RUN dotnet build Tamagotchi.Competition.csproj -c Release -o /app
 
 FROM build AS publish
-RUN dotnet publish "Tamagotchi.Competition.csproj" -c Release -o /app
+RUN dotnet publish Tamagotchi.Competition.csproj -c Release -o /app
 
 FROM base AS final
 WORKDIR /app
