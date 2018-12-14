@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
@@ -18,8 +16,8 @@ using Tamagotchi.Competition.Providers.Score;
 namespace Tamagotchi.Competition.Controllers
 {
     [EnableCors(ConfigSections.CORS_POLICY)]
-    [Route("[controller]")]
     [Produces("application/json")]
+    [Consumes("application/json")]
     public class CompetitionController : ControllerBase
     {
         private readonly IScoreProvider _scoreProvider;
@@ -33,9 +31,9 @@ namespace Tamagotchi.Competition.Controllers
         }
 
         [HttpGet("version")]
+        [AllowAnonymous]
         public ApiResult<VersionViewModel> Version()
         {
-            var user = User;
             return new ApiResult<VersionViewModel> { Data = new VersionViewModel { Version = _appConfig.Value.ProjectVersion } };
         }
 

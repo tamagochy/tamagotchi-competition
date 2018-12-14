@@ -82,7 +82,7 @@ namespace Tamagotchi.Competition
                        {
                            Name = "Swagger",
                            Url = "https://github.com/swagger-api/",
-                           Email = "ppp@ppp.io"
+                           Email = "tamagotchi.vlsu@gmail.com"
                        },
                        TermsOfService = "http://swagger.io/terms/"
                    });
