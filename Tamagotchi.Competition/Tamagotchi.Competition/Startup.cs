@@ -54,7 +54,7 @@ namespace Tamagotchi.Competition
                };
            });
             services.AddDbContext<TamagotchiCompetitionContext>(options =>
-              options.UseNpgsql(Configuration.GetConnectionString(ConfigSections.DATABASE)));
+              options.UseNpgsql(Configuration.GetSection(ConfigSections.DATABASE).Value));
             services.AddScoped<TamagotchiCompetitionContext>();
             services.AddScoped<IScoreProvider, ScoreProvider>();
             services.AddScoped<IEventProvider, EventProvider>();
