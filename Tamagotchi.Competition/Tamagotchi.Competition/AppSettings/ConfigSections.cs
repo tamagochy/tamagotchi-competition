@@ -1,11 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
+﻿
 namespace Tamagotchi.Competition.AppSettings
 {
-    public class ConfigSections
+    public static class ConfigSections
     {
+        public const string DATABASE = "DB";
+        public const string LOGGING = "Logging";
+        public const string APP_CONFIG = "AppConfig";
+        public const string SecretKey = "AppConfig:SecretKey";
+        public const string CORS_POLICY = "AuthPolicy";
     }
 }
