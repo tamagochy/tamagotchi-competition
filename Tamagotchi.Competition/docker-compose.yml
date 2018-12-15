@@ -12,7 +12,7 @@ services:
     - "postgres-data-auth:/var/lib/postgresql/data"
 
   app:
-    image: ${DOCKER_REGISTRY}tamagotchicompetition
+    image: palicpiotr/tamagotchi.competition
     restart: always
     ports:
     - "5001:80"
