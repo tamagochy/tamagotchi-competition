@@ -17,8 +17,8 @@ namespace Tamagotchi.Competition.Migrations
                     ACTION_CODE = table.Column<string>(unicode: false, maxLength: 255, nullable: false),
                     ROOM_CODE = table.Column<string>(unicode: false, maxLength: 255, nullable: false),
                     DESEASE_CODE = table.Column<string>(unicode: false, maxLength: 255, nullable: true),
-                    START = table.Column<DateTime>(type: "date", nullable: false),
-                    FINISH = table.Column<DateTime>(type: "date", nullable: false),
+                    START = table.Column<TimeSpan>(type: "time", nullable: false),
+                    FINISH = table.Column<TimeSpan>(type: "time", nullable: false),
                     VALUE = table.Column<int>(nullable: false)
                 },
                 constraints: table =>

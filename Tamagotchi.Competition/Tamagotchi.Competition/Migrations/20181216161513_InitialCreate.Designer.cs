@@ -10,7 +10,7 @@ using Tamagotchi.Competition.Context;
 namespace Tamagotchi.Competition.Migrations
 {
     [DbContext(typeof(TamagotchiCompetitionContext))]
-    [Migration("20181212192957_InitialCreate")]
+    [Migration("20181216161513_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -38,9 +38,9 @@ namespace Tamagotchi.Competition.Migrations
                         .HasMaxLength(255)
                         .IsUnicode(false);
 
-                    b.Property<DateTime>("Finish")
+                    b.Property<TimeSpan>("Finish")
                         .HasColumnName("FINISH")
-                        .HasColumnType("date");
+                        .HasColumnType("time");
 
                     b.Property<string>("RoomCode")
                         .IsRequired()
@@ -48,9 +48,9 @@ namespace Tamagotchi.Competition.Migrations
                         .HasMaxLength(255)
                         .IsUnicode(false);
 
-                    b.Property<DateTime>("Start")
+                    b.Property<TimeSpan>("Start")
                         .HasColumnName("START")
-                        .HasColumnType("date");
+                        .HasColumnType("time");
 
                     b.Property<int>("Value")
                         .HasColumnName("VALUE");
