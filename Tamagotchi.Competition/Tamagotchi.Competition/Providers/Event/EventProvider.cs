@@ -40,7 +40,7 @@ namespace Tamagotchi.Competition.Providers.Event
                         StartDate = x.Start,
                         Value = x.Value
                     }).FirstOrDefaultAsync(CancellationToken.None)
-            };
+            };           
         }
     }
 }
