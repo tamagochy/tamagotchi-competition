@@ -90,7 +90,6 @@ namespace Tamagotchi.Competition.Providers.Score
             url += "getUserLogins";
             _logger.LogDebug(url);
             var ids = await topPlayers.Select(___ => ___.UserId).ToArrayAsync(CancellationToken.None);
-
             _logger.LogDebug($"player ids that: {string.Join(",", ids)}");
             var request = await RequestExecutor.ExecuteRequest(url, new RestRequest(url, Method.POST)
                                         .AddHeader("Content-type", "application/json")
