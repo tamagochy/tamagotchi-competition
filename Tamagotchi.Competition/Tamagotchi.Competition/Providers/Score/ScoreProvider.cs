@@ -3,20 +3,19 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using RestSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
+using Tamagotchi.Competition.API;
 using Tamagotchi.Competition.AppSettings;
 using Tamagotchi.Competition.Consts;
 using Tamagotchi.Competition.Context;
-using Tamagotchi.Competition.Helpers.API;
-using Tamagotchi.Competition.Helpers.Rest;
 using Tamagotchi.Competition.Models;
 using Tamagotchi.Competition.Providers.Event;
-using SuccessResult = Tamagotchi.Competition.Helpers.API.SuccessResult;
 
 namespace Tamagotchi.Competition.Providers.Score
 {
@@ -86,24 +85,35 @@ namespace Tamagotchi.Competition.Providers.Score
             .Take(_appConfig.Value.CountTopPlayers);
             if (!await topPlayers.AnyAsync())
                 return new ApiResult<IEnumerable<ScoreViewModel>> { Data = new List<ScoreViewModel>() };
-            var url = _appConfig.Value.AuthBaseUrl;
-            url += "getUserLogins";
-            _logger.LogDebug(url);
-            var ids = await topPlayers.Select(___ => ___.UserId).ToArrayAsync(CancellationToken.None);
+            var baseUrl = _appConfig.Value.AuthBaseUrl;
+            baseUrl += "getUserLogins";
+            _logger.LogDebug(baseUrl);          
+            var ids = await topPlayers
+                .Where(x => x.UserId.HasValue)
+                .Select(___ => ___.UserId.Value)
+                .ToArrayAsync(CancellationToken.None);           
             _logger.LogDebug($"player ids that: {string.Join(",", ids)}");
-            var request = await RequestExecutor.ExecuteRequest(url, new RestRequest(url, Method.POST)
-                                        .AddHeader("Content-type", "application/json")
-                                        .AddJsonBody(ids.Where(_ => _.HasValue).Select(_ => _.Value).ToArray()));
-            _logger.LogDebug($"Response from Auth: {request}");
-            var logins = JsonConvert.DeserializeObject<BaseAuthEntity>(request);
+            var httpClient = new HttpClient
+            {
+                BaseAddress = new Uri(baseUrl)
+            };
+            httpClient.DefaultRequestHeaders.Accept.Clear();
+            httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            var json = JArray.Parse(JsonConvert.SerializeObject(ids));
+            HttpResponseMessage httpResponse = await httpClient.PostAsJsonAsync(baseUrl, json);          
+            BaseAuthEntity logins = null;
+            if (httpResponse.IsSuccessStatusCode)
+            {
+                var content = await httpResponse.Content.ReadAsStringAsync();
+                if(content != null)
+                    logins = JsonConvert.DeserializeObject<BaseAuthEntity>(content);
+            }           
             if (!logins.Users.Any())
                 throw new Exception(ErrorCodes.SERVER_ERROR);
             var result = await topPlayers.ToListAsync(CancellationToken.None);
             foreach (var score in result)
             {
-                var currentLogin = logins.Users.FirstOrDefault(_ => _.UserId == score.UserId);
-                if (currentLogin == null)
-                    return new ApiResult<IEnumerable<ScoreViewModel>> { Errors = new List<Error> { new Error { Message = "" } } };
+                var currentLogin = logins.Users.FirstOrDefault(_ => _.UserId == score.UserId);                
                 score.Login = currentLogin.Login;
             }
             return new ApiResult<IEnumerable<ScoreViewModel>> { Data = result };
@@ -145,4 +155,23 @@ namespace Tamagotchi.Competition.Providers.Score
         }
 
     }
+
+    public static class HttpClientExtensions
+    {
+        public static Task<HttpResponseMessage> PostAsJsonAsync<T>(
+            this HttpClient httpClient, string url, T data)
+        {
+            var dataAsString = JsonConvert.SerializeObject(data);
+            var content = new StringContent(dataAsString);
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            return httpClient.PostAsync(url, content);
+        }
+
+        public static async Task<T> ReadAsJsonAsync<T>(this HttpContent content)
+        {
+            var dataAsString = await content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<T>(dataAsString);
+        }
+    }
+
 }

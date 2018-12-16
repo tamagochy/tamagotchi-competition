@@ -103,6 +103,7 @@ namespace Tamagotchi.Competition
         {
             loggerFactory.AddNLog();
             //NLog.LogManager.LoadConfiguration("NLog.config");
+            //loggerFactory.ConfigureNLog("NLog.config");
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

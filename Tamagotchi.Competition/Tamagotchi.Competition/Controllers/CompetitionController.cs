@@ -8,9 +8,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
+using Tamagotchi.Competition.API;
 using Tamagotchi.Competition.AppSettings;
 using Tamagotchi.Competition.Consts;
-using Tamagotchi.Competition.Helpers.API;
 using Tamagotchi.Competition.Models;
 using Tamagotchi.Competition.Providers.Score;
 
