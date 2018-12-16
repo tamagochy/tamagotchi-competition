@@ -20,6 +20,7 @@ namespace Tamagotchi.Competition.Models
         public string ActionCode { get; set; }
         [JsonProperty("roomCode")]
         public string RoomCode { get; set; }
+        [JsonProperty("deseaseCode")]
         public string DeseaseCode { get; set; }
         [JsonProperty("time")]        
         public string Time { get; set; }
