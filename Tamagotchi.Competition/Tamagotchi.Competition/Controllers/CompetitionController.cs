@@ -76,6 +76,7 @@ namespace Tamagotchi.Competition.Controllers
             }
             catch (Exception)
             {
+                HttpContext.Response.StatusCode = 500;
                 return new ApiResult<IEnumerable<ScoreViewModel>>() { Errors = new List<Error> { new Error { Message = ErrorCodes.SERVER_ERROR } } };
             }
             return topPlayers;
@@ -91,22 +92,32 @@ namespace Tamagotchi.Competition.Controllers
             try
             {
                 if (User == null)
+                {
+                    HttpContext.Response.StatusCode = 401;
                     return new ApiResult<SuccessResult>() { Errors = new List<Error> { new Error { Message = ErrorCodes.UNAUTHORIZED } } };
+                }  
                 var claim = User.Claims
                                 .Where(_ => _.Type.Equals(AppConsts.USER_ID))
                                 .Select(_ => _.Value)
                                 .FirstOrDefault();
                 if (string.IsNullOrWhiteSpace(claim))
+                {
+                    HttpContext.Response.StatusCode = 401;
                     return new ApiResult<SuccessResult>() { Errors = new List<Error> { new Error { Message = ErrorCodes.UNAUTHORIZED } } };
+                }
                 if (long.TryParse(claim, out long userId))
                     model.UserId = userId;
                 else
+                {
+                    HttpContext.Response.StatusCode = 400;
                     return new ApiResult<SuccessResult>() { Errors = new List<Error> { new Error { Message = ErrorCodes.PROTOCOL_INCORRECT } } };
+                }
                 var result = await _scoreProvider.UpdateScoreAsync(model);
                 return result;
             }
             catch (Exception)
             {
+                HttpContext.Response.StatusCode = 400;
                 return new ApiResult<SuccessResult> { Errors = new List<Error> { new Error { Message = ErrorCodes.PROTOCOL_INCORRECT } } };
             }
         }

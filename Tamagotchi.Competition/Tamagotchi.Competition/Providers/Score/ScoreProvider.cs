@@ -83,15 +83,15 @@ namespace Tamagotchi.Competition.Providers.Score
             if (!await topPlayers.AnyAsync())
                 return new ApiResult<IEnumerable<ScoreViewModel>> { Data = new List<ScoreViewModel>() };
             var url = _appConfig.Value.AuthBaseUrl;
-            url += "getUserLogins";
+            url += "getUserLogins1";
             var ids = await topPlayers.Select(___ => ___.UserId).ToArrayAsync(CancellationToken.None);
             var jarr = JArray.FromObject(ids);
             var request = await RequestExecutor.ExecuteRequest(url, new RestRequest(url, Method.POST)
                                         .AddHeader("Content-type", "application/json")
                                         .AddJsonBody(ids.Where(_ => _.HasValue).Select(_ => _.Value).ToArray()));
             var logins = JsonConvert.DeserializeObject<BaseAuthEntity>(request);
-            if (!logins.Users.Any())
-                return new ApiResult<IEnumerable<ScoreViewModel>> { Data = new List<ScoreViewModel>() };
+            if (!logins.Users.Any())              
+                throw new Exception(ErrorCodes.SERVER_ERROR);
             var result = await topPlayers.ToListAsync(CancellationToken.None);
             foreach (var score in result)
             {
