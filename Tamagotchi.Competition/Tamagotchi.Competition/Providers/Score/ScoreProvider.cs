@@ -118,7 +118,7 @@ namespace Tamagotchi.Competition.Providers.Score
         {
             var errorResults = new List<Error>();
             var apiResult = new ApiResult<ScoreViewModel>() { Errors = new List<Error>(errorResults) };
-            if (!DateTime.TryParse(model.Time, out DateTime result))
+            if (!TimeSpan.TryParse(model.Time, out TimeSpan result))
                 errorResults.Add(new Error { Message = ErrorCodes.PROTOCOL_INCORRECT });
             else
                 model.EventDate = result;
