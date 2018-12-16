@@ -20,7 +20,7 @@ namespace Tamagotchi.Competition.Models
         public string RoomCode { get; set; }
         public string DeseaseCode { get; set; }
         public string Time { get; set; }
-        public DateTime EventDate { get; set; }
+        public TimeSpan EventDate { get; set; }
     }
 
 }
