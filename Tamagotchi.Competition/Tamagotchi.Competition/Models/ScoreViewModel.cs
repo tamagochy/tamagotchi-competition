@@ -14,17 +14,20 @@ namespace Tamagotchi.Competition.Models
         public int Value { get; set; }
     }
 
-    public class ScoreParam : ScoreViewModel
-    {       
+    public class ScoreParam
+    {
         [JsonProperty("actionCode")]
         public string ActionCode { get; set; }
         [JsonProperty("roomCode")]
         public string RoomCode { get; set; }
         [JsonProperty("deseaseCode")]
         public string DeseaseCode { get; set; }
-        [JsonProperty("time")]        
+        [JsonProperty("time")]
         public string Time { get; set; }
-        public TimeSpan EventDate { get; set; }
+        [JsonIgnore]
+        public TimeSpan EventTime { get; set; }
+        [JsonIgnore]
+        public long UserId { get; set; }
     }
 
 }

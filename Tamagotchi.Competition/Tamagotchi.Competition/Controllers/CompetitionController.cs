@@ -84,9 +84,8 @@ namespace Tamagotchi.Competition.Controllers
         [ProducesResponseType(typeof(ApiResult<ScoreViewModel>), 200)]
         [Authorize]
         [HttpPut("changeScore")]
-        public async Task<ApiResult<SuccessResult>> ChangeScore([FromBody]JObject model)
+        public async Task<dynamic> ChangeScore([FromBody]ScoreParam model)
         {
-            var apiResult = new ApiResult<SuccessResult>();
             try
             {
                 if (User == null)
@@ -97,18 +96,17 @@ namespace Tamagotchi.Competition.Controllers
                                 .FirstOrDefault();
                 if (string.IsNullOrWhiteSpace(claim))
                     return new ApiResult<SuccessResult>() { Errors = new List<Error> { new Error { Message = ErrorCodes.UNAUTHORIZED } } };
-                var scoreParam = model.ToObject<ScoreParam>();
                 if (long.TryParse(claim, out long userId))
-                    scoreParam.UserId = userId;
+                    model.UserId = userId;
                 else
                     return new ApiResult<SuccessResult>() { Errors = new List<Error> { new Error { Message = ErrorCodes.PROTOCOL_INCORRECT } } };
-                apiResult = await _scoreProvider.UpdateScoreAsync(scoreParam);
+                var result = await _scoreProvider.UpdateScoreAsync(model);
+                return result;
             }
             catch (Exception)
             {
                 return new ApiResult<SuccessResult> { Errors = new List<Error> { new Error { Message = ErrorCodes.PROTOCOL_INCORRECT } } };
             }
-            return apiResult;
         }
 
     }

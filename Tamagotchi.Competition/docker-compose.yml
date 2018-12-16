@@ -17,7 +17,7 @@ services:
     ports:
     - "5001:80"
     environment:
-      AppInfo__ProjectVersion: '1.0.0'  
+      AppInfo__ProjectVersion: '1.0.7'  
       AppInfo__CountTopPlayers: '10'   
       AppInfo__SecretKey: 'TamagotchiSecretKey'
       AppInfo__AuthBaseUrl: 'http://localhost:50725/'

@@ -15,6 +15,7 @@ using Tamagotchi.Competition.Helpers.API;
 using Tamagotchi.Competition.Helpers.Rest;
 using Tamagotchi.Competition.Models;
 using Tamagotchi.Competition.Providers.Event;
+using SuccessResult = Tamagotchi.Competition.Helpers.API.SuccessResult;
 
 namespace Tamagotchi.Competition.Providers.Score
 {
@@ -102,32 +103,38 @@ namespace Tamagotchi.Competition.Providers.Score
             return new ApiResult<IEnumerable<ScoreViewModel>> { Data = result };
         }
 
-        public async Task<ApiResult<SuccessResult>> UpdateScoreAsync(ScoreParam model)
+        public async Task<dynamic> UpdateScoreAsync(ScoreParam model)
         {
-            ValidateUpdateScoreModel(model);
+            var validateErrors = ValidateUpdateScoreModel(model);
+            if (validateErrors.Errors != null && validateErrors.Errors.Any())
+                return validateErrors;
             var @event = await _eventProvider.GetEvent(model);
+            if (@event == null || @event.Data == null)
+                return new ApiResult<SuccessResult> { Errors = new List<Error> { new Error { Message = ErrorCodes.BUSSINESS_CODE_EVENT_NOT_FOUND } } };
             var score = await _ctx.Score.Where(x => x.UserId == model.UserId).FirstOrDefaultAsync();
             if (score == null)
-                return new ApiResult<SuccessResult> { Errors = new List<Error> { new Error { Message = ErrorCodes.BUSSINESS_CODE_EVENT_NOT_FOUND } } };
+                return new ApiResult<SuccessResult> { Errors = new List<Error> { new Error { Message = ErrorCodes.BUSSINESS_CODE_SCORE_NOT_FOUND } } };
             score.Value += @event.Data.Value;// += model.Value;
             await _ctx.SaveChangesAsync(CancellationToken.None);
-            return new ApiResult<SuccessResult> { Data = { } };
+            return new ApiResult<SuccessResult> { Data = new SuccessResult { Succeed = true } };
         }
 
         private ApiResult<ScoreViewModel> ValidateUpdateScoreModel(ScoreParam model)
         {
             var errorResults = new List<Error>();
             var apiResult = new ApiResult<ScoreViewModel>() { Errors = new List<Error>(errorResults) };
-            if (!TimeSpan.TryParse(model.Time, out TimeSpan result))
-                errorResults.Add(new Error { Message = ErrorCodes.PROTOCOL_INCORRECT });
-            else
-                model.EventDate = result;
             if (string.IsNullOrWhiteSpace(model.ActionCode))
                 errorResults.Add(new Error { Attribute = "actionCode", Message = ErrorCodes.VALIDATION_MISSING });
             if (string.IsNullOrWhiteSpace(model.RoomCode))
                 errorResults.Add(new Error { Attribute = "roomCode", Message = ErrorCodes.VALIDATION_MISSING });
             if (string.IsNullOrWhiteSpace(model.Time))
                 errorResults.Add(new Error { Attribute = "time", Message = ErrorCodes.VALIDATION_MISSING });
+            if (errorResults.Any())
+                return new ApiResult<ScoreViewModel>() { Errors = new List<Error>(errorResults) };
+            if (!TimeSpan.TryParse(model.Time, out TimeSpan result))
+                errorResults.Add(new Error { Message = ErrorCodes.PROTOCOL_INCORRECT });
+            else
+                model.EventTime = result;
             return new ApiResult<ScoreViewModel>() { Errors = new List<Error>(errorResults) };
         }
 

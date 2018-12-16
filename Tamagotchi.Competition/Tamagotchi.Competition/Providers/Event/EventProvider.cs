@@ -25,7 +25,7 @@ namespace Tamagotchi.Competition.Providers.Event
             IQueryable<Events> evt = _ctx.Events.Where(x => x.ActionCode == model.ActionCode && x.RoomCode == model.RoomCode);
             if (!string.IsNullOrEmpty(model.DeseaseCode))
                 evt = evt.Where(x => x.DeseaseCode == model.DeseaseCode);
-            evt = evt.Where(x => x.Start >= model.EventDate && x.Finish <= model.EventDate);
+            evt = evt.Where(x => x.Start <= model.EventTime && x.Finish >= model.EventTime);
             if (evt == null && !await evt.AnyAsync())
                 return new ApiResult<EventViewModel> { Errors = new List<Error> { new Error { Message = ErrorCodes.BUSSINESS_CODE_EVENT_NOT_FOUND } } };
             return new ApiResult<EventViewModel>
