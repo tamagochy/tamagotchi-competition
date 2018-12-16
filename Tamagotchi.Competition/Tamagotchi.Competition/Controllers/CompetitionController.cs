@@ -41,7 +41,7 @@ namespace Tamagotchi.Competition.Controllers
         [ProducesResponseType(typeof(ApiResult<ScoreViewModel>), 400)]
         [ProducesResponseType(typeof(ApiResult<ScoreViewModel>), 200)]
         [Authorize]
-        public async Task<ApiResult<ScoreViewModel>> GetScore()
+        public async Task<dynamic> GetScore()
         {
             if (User == null)
                 return new ApiResult<ScoreViewModel>() { Errors = new List<Error> { new Error { Message = ErrorCodes.UNAUTHORIZED } } };
@@ -53,7 +53,9 @@ namespace Tamagotchi.Competition.Controllers
                 return new ApiResult<ScoreViewModel>() { Errors = new List<Error> { new Error { Message = ErrorCodes.UNAUTHORIZED } } };
             if (long.TryParse(claim, out long userId))
             {
-                return await _scoreProvider.GetScoreAsync(userId == default ? 0 : userId);
+                var apiResult = await _scoreProvider.GetScoreAsync(userId == default ? 0 : userId);
+                var data = apiResult?.Data?.Value;
+                return new JsonResult(new { Data = data });
             }
             else
             {
