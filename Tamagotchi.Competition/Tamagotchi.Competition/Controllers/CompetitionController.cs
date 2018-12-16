@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
 using Tamagotchi.Competition.AppSettings;
@@ -22,12 +23,15 @@ namespace Tamagotchi.Competition.Controllers
     {
         private readonly IScoreProvider _scoreProvider;
         private readonly IOptions<AppConfig> _appConfig;
+        private ILogger<CompetitionController> _logger;
 
-        public CompetitionController(IScoreProvider scoreProvider, IOptions<AppConfig> appConfig)
+        public CompetitionController(IScoreProvider scoreProvider, IOptions<AppConfig> appConfig, ILogger<CompetitionController> logger)
         {
             _scoreProvider = scoreProvider;
             if (appConfig != null)
                 _appConfig = appConfig;
+            if (logger != null)
+                _logger = logger;
         }
 
         [HttpGet("version")]
@@ -74,8 +78,9 @@ namespace Tamagotchi.Competition.Controllers
             {
                 topPlayers = await _scoreProvider.GetTopPlayersAsync();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogError($"An error has occured: {topPlayers}. {ex}");
                 HttpContext.Response.StatusCode = 500;
                 return new ApiResult<IEnumerable<ScoreViewModel>>() { Errors = new List<Error> { new Error { Message = ErrorCodes.SERVER_ERROR } } };
             }

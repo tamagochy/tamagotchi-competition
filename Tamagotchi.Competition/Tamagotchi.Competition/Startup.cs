@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using NLog.Extensions.Logging;
 using Swashbuckle.AspNetCore.Swagger;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Tamagotchi.Competition.Accessor;
@@ -56,6 +57,8 @@ namespace Tamagotchi.Competition
             services.AddDbContext<TamagotchiCompetitionContext>(options =>
               options.UseNpgsql(Configuration.GetSection(ConfigSections.DATABASE).Value));
             services.AddScoped<TamagotchiCompetitionContext>();
+            services.AddSingleton<ILoggerFactory, LoggerFactory>();
+            services.AddSingleton(typeof(ILogger<>), typeof(Logger<>));
             services.AddScoped<IScoreProvider, ScoreProvider>();
             services.AddScoped<IEventProvider, EventProvider>();
             services.AddScoped<CompetitionController>();
@@ -93,11 +96,13 @@ namespace Tamagotchi.Competition
             {
                 // All endpoints need authorization using our custom authorization filter
                 options.Filters.Add(new AuthAccessor(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build()));
-            });
+            });          
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
+            loggerFactory.AddNLog();
+            //NLog.LogManager.LoadConfiguration("NLog.config");
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -112,8 +117,9 @@ namespace Tamagotchi.Competition
                    c.RoutePrefix = "swagger/ui";
                    c.SwaggerEndpoint("/swagger/1.0.0/swagger.json", "Competition API");
                });
+            //app.AddNlog();
             loggerFactory.AddConsole(Configuration.GetSection(ConfigSections.LOGGING));
-            loggerFactory.AddDebug();
+            loggerFactory.AddDebug();            
             app.UseCors(ConfigSections.CORS_POLICY);
             app.UseMvc();
         }

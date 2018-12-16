@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -24,12 +25,15 @@ namespace Tamagotchi.Competition.Providers.Score
         private readonly TamagotchiCompetitionContext _ctx;
         private readonly IEventProvider _eventProvider;
         private readonly IOptions<AppConfig> _appConfig;
+        private ILogger<ScoreProvider> _logger;
 
-        public ScoreProvider(TamagotchiCompetitionContext ctx, IEventProvider eventProvider, IOptions<AppConfig> appConfig)
+        public ScoreProvider(TamagotchiCompetitionContext ctx, IEventProvider eventProvider, IOptions<AppConfig> appConfig, ILogger<ScoreProvider> logger)
         {
             _ctx = ctx;
             _eventProvider = eventProvider;
             _appConfig = appConfig;
+            if (logger != null)
+                _logger = logger;
         }
 
         public async Task<ApiResult<ScoreViewModel>> GetScoreAsync(long userId)
@@ -78,19 +82,22 @@ namespace Tamagotchi.Competition.Providers.Score
                 UserId = _.UserId,
                 Value = _.Value
             })
-            .OrderBy(x => x.Value)
+            .OrderByDescending(x => x.Value)
             .Take(_appConfig.Value.CountTopPlayers);
             if (!await topPlayers.AnyAsync())
                 return new ApiResult<IEnumerable<ScoreViewModel>> { Data = new List<ScoreViewModel>() };
             var url = _appConfig.Value.AuthBaseUrl;
-            url += "getUserLogins1";
-            var ids = await topPlayers.Select(___ => ___.UserId).ToArrayAsync(CancellationToken.None);
-            var jarr = JArray.FromObject(ids);
+            url += "getUserLogins";
+            _logger.LogDebug(url);
+            var ids = new long?[] {1,2,3,4,5 };//await topPlayers.Select(___ => ___.UserId).ToArrayAsync(CancellationToken.None);
+
+            _logger.LogDebug($"player ids that: {string.Join(",", ids)}");          
             var request = await RequestExecutor.ExecuteRequest(url, new RestRequest(url, Method.POST)
                                         .AddHeader("Content-type", "application/json")
                                         .AddJsonBody(ids.Where(_ => _.HasValue).Select(_ => _.Value).ToArray()));
+            _logger.LogDebug($"Response from Auth: {request}");
             var logins = JsonConvert.DeserializeObject<BaseAuthEntity>(request);
-            if (!logins.Users.Any())              
+            if (!logins.Users.Any())
                 throw new Exception(ErrorCodes.SERVER_ERROR);
             var result = await topPlayers.ToListAsync(CancellationToken.None);
             foreach (var score in result)

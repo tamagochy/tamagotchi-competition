@@ -21,6 +21,8 @@
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.0.1916590" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.1.1" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
+    <PackageReference Include="NLog" Version="4.5.11" />
+    <PackageReference Include="NLog.Extensions.Logging" Version="1.3.0" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="2.1.2" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL.Design" Version="1.1.1" />
     <PackageReference Include="RestSharp" Version="106.5.4" />
@@ -29,6 +31,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Tamagotchi.Competition.Helpers\Tamagotchi.Competition.Helpers.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="NLog.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>
