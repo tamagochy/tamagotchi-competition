@@ -9,8 +9,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Tamagotchi.Competition.API;
 using Tamagotchi.Competition.Consts;
-using Tamagotchi.Competition.Helpers.API;
 
 namespace Tamagotchi.Competition.Accessor
 {

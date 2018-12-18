@@ -36,9 +36,9 @@ namespace Tamagotchi.Competition.Migrations
                         .HasMaxLength(255)
                         .IsUnicode(false);
 
-                    b.Property<DateTime>("Finish")
+                    b.Property<TimeSpan>("Finish")
                         .HasColumnName("FINISH")
-                        .HasColumnType("date");
+                        .HasColumnType("time");
 
                     b.Property<string>("RoomCode")
                         .IsRequired()
@@ -46,9 +46,9 @@ namespace Tamagotchi.Competition.Migrations
                         .HasMaxLength(255)
                         .IsUnicode(false);
 
-                    b.Property<DateTime>("Start")
+                    b.Property<TimeSpan>("Start")
                         .HasColumnName("START")
-                        .HasColumnType("date");
+                        .HasColumnType("time");
 
                     b.Property<int>("Value")
                         .HasColumnName("VALUE");

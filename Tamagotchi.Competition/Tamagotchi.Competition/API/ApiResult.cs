@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System.Collections.Generic;
 
-namespace Tamagotchi.Competition.Helpers.API
+namespace Tamagotchi.Competition.API
 {
     public class ApiResult<T> where T : class
     {

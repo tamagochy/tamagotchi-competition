@@ -39,6 +39,8 @@ namespace Tamagotchi.Competition
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddOptions();       
+            services.AddSingleton<IConfiguration>(Configuration);
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
            .AddJwtBearer(options =>
            {
@@ -46,21 +48,20 @@ namespace Tamagotchi.Competition
                {
                    ValidateIssuer = false,
                    ValidateAudience = false,
-
                    ValidateLifetime = true,
                    ValidateIssuerSigningKey = true,
-
                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration.GetSection(ConfigSections.SecretKey).Value))
                };
            });
             services.AddDbContext<TamagotchiCompetitionContext>(options =>
               options.UseNpgsql(Configuration.GetSection(ConfigSections.DATABASE).Value));
             services.AddScoped<TamagotchiCompetitionContext>();
+            services.AddSingleton<ILoggerFactory, LoggerFactory>();
+            services.AddSingleton(typeof(ILogger<>), typeof(Logger<>));
             services.AddScoped<IScoreProvider, ScoreProvider>();
             services.AddScoped<IEventProvider, EventProvider>();
-            services.AddScoped<CompetitionController>();
-            IConfigurationSection appConfig = Configuration.GetSection(ConfigSections.APP_CONFIG);
-            services.Configure<AppConfig>(appConfig);
+            services.AddScoped<CompetitionController>();           
+            var appConfig = Configuration.GetSection(ConfigSections.APP_CONFIG);          
             var corsBuilder = new CorsPolicyBuilder()
                         .AllowAnyHeader()
                         .AllowAnyMethod()
@@ -88,16 +89,21 @@ namespace Tamagotchi.Competition
                    });
                    c.CustomSchemaIds(type => type.FriendlyId(true));
                    c.DescribeAllEnumsAsStrings();
-               });         
+               });
             services.AddMvc(options =>
             {
                 // All endpoints need authorization using our custom authorization filter
                 options.Filters.Add(new AuthAccessor(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build()));
             });
+            services.Configure<AppConfig>(appConfig);
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
+            loggerFactory
+                .AddConsole()
+                .AddDebug()
+                .AddEventSourceLogger();
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -112,8 +118,10 @@ namespace Tamagotchi.Competition
                    c.RoutePrefix = "swagger/ui";
                    c.SwaggerEndpoint("/swagger/1.0.0/swagger.json", "Competition API");
                });
-            loggerFactory.AddConsole(Configuration.GetSection(ConfigSections.LOGGING));
-            loggerFactory.AddDebug();
+            //app.AddNlog();
+            //loggerFactory.AddConsole(Configuration.GetSection(ConfigSections.LOGGING));
+            //loggerFactory.AddDebug();     
+
             app.UseCors(ConfigSections.CORS_POLICY);
             app.UseMvc();
         }

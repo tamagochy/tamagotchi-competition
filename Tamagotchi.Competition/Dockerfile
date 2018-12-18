@@ -5,8 +5,8 @@ EXPOSE 80
 FROM microsoft/aspnetcore-build:2.0 AS build
 WORKDIR /src
 COPY /Tamagotchi.Competition/Tamagotchi.Competition.csproj Tamagotchi.Competition/
-COPY /Tamagotchi.Competition.Helpers/Tamagotchi.Competition.Helpers.csproj Tamagotchi.Competition.Helpers/
 RUN dotnet restore Tamagotchi.Competition/Tamagotchi.Competition.csproj
+
 WORKDIR /src/Tamagotchi.Competition
 COPY . .
 RUN dotnet build Tamagotchi.Competition.csproj -c Release -o /app

@@ -10,8 +10,8 @@ namespace Tamagotchi.Competition.Context
         public string ActionCode { get; set; }
         public string RoomCode { get; set; }
         public string DeseaseCode { get; set; }
-        public DateTime Start { get; set; }
-        public DateTime Finish { get; set; }
+        public TimeSpan Start { get; set; }
+        public TimeSpan Finish { get; set; }
         public int Value { get; set; }
     }
 }

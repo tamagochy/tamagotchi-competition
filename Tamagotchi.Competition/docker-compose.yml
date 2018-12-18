@@ -17,15 +17,10 @@ services:
     ports:
     - "5001:80"
     environment:
-      AppInfo__ProjectVersion: '1.0.0'
-      AppInfo__ApplicationEmail: 'tamagotchi.vlsu@gmail.com'
-      AppInfo__EmailPassword: 'istm.prim.2018'
-      AppInfo__ApplicationUrl: 'tama.gotchi.competition'
-      AppInfo__CountTopPlayers: '10'
-      AppInfo__LifeTimeToken: '24'
-      AppInfo__ConfirmCodeLifeTime: '300'
-      AppInfo__SecretKey: 'TamagotchiSecretKey'
-      AppInfo__AuthBaseUrl: 'http://localhost:50725/'
+      AppConfig__ProjectVersion: '1.0.9'
+      AppConfig__SecretKey: 'TamagotchiSecretKey'
+      AppConfig__CountTopPlayers: '10'   
+      AppConfig__AuthBaseUrl: 'http://localhost:50725/'
     depends_on:
     - db
   

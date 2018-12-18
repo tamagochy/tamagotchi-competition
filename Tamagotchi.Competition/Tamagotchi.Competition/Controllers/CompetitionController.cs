@@ -5,11 +5,12 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json.Linq;
+using Tamagotchi.Competition.API;
 using Tamagotchi.Competition.AppSettings;
 using Tamagotchi.Competition.Consts;
-using Tamagotchi.Competition.Helpers.API;
 using Tamagotchi.Competition.Models;
 using Tamagotchi.Competition.Providers.Score;
 
@@ -21,27 +22,50 @@ namespace Tamagotchi.Competition.Controllers
     public class CompetitionController : ControllerBase
     {
         private readonly IScoreProvider _scoreProvider;
-        private readonly IOptions<AppConfig> _appConfig;
+        private readonly AppConfig _appConfig;
+        private readonly ILogger _logger;
+        private readonly IConfiguration _config;
 
-        public CompetitionController(IScoreProvider scoreProvider, IOptions<AppConfig> appConfig)
+        public CompetitionController(IScoreProvider scoreProvider, IOptions<AppConfig> appConfig, ILogger<CompetitionController> logger, IConfiguration config)
         {
             _scoreProvider = scoreProvider;
             if (appConfig != null)
-                _appConfig = appConfig;
+                _appConfig = appConfig.Value;
+            if (logger != null)
+                _logger = logger;
+            if (config != null)
+                _config = config;
+            else
+            {
+                _logger.LogWarning($"Configuration is null {config}");
+                foreach (var c in config.AsEnumerable())
+                    _logger.LogWarning($"Config Value: {c.Key}:{c.Value}");
+            }
         }
 
         [HttpGet("version")]
         [AllowAnonymous]
-        public ApiResult<VersionViewModel> Version()
+        public dynamic Version()
         {
-            return new ApiResult<VersionViewModel> { Data = new VersionViewModel { Version = _appConfig.Value.ProjectVersion } };
+            var version = _appConfig.ProjectVersion;
+            if (version == null)
+            {
+                _logger.LogWarning($"Parameter of project version is null. It's not defined in docker-compose. Get from appsettings Environment.");
+                foreach (var c in _config.AsEnumerable())
+                    _logger.LogWarning($"Config Value: {c.Key}:{c.Value}");
+                _logger.LogInformation("Try get by ASPNETCORE_PKG_VERSION");
+                var pkg = _config.AsEnumerable().FirstOrDefault(x => x.Key == "ASPNETCORE_PKG_VERSION");
+                if (pkg.Value != null)
+                    version = pkg.Value;
+            }
+            return new JsonResult(new { Version = version });
         }
 
         [HttpGet("getScore")]
         [ProducesResponseType(typeof(ApiResult<ScoreViewModel>), 400)]
         [ProducesResponseType(typeof(ApiResult<ScoreViewModel>), 200)]
         [Authorize]
-        public async Task<ApiResult<ScoreViewModel>> GetScore()
+        public async Task<dynamic> GetScore()
         {
             if (User == null)
                 return new ApiResult<ScoreViewModel>() { Errors = new List<Error> { new Error { Message = ErrorCodes.UNAUTHORIZED } } };
@@ -53,7 +77,9 @@ namespace Tamagotchi.Competition.Controllers
                 return new ApiResult<ScoreViewModel>() { Errors = new List<Error> { new Error { Message = ErrorCodes.UNAUTHORIZED } } };
             if (long.TryParse(claim, out long userId))
             {
-                return await _scoreProvider.GetScoreAsync(userId == default ? 0 : userId);
+                var apiResult = await _scoreProvider.GetScoreAsync(userId == default ? 0 : userId);
+                var data = apiResult?.Data?.Value;
+                return new JsonResult(new { Data = data });
             }
             else
             {
@@ -72,8 +98,10 @@ namespace Tamagotchi.Competition.Controllers
             {
                 topPlayers = await _scoreProvider.GetTopPlayersAsync();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogError($"An error has occured: {topPlayers}. {ex}");
+                HttpContext.Response.StatusCode = 500;
                 return new ApiResult<IEnumerable<ScoreViewModel>>() { Errors = new List<Error> { new Error { Message = ErrorCodes.SERVER_ERROR } } };
             }
             return topPlayers;
@@ -84,31 +112,39 @@ namespace Tamagotchi.Competition.Controllers
         [ProducesResponseType(typeof(ApiResult<ScoreViewModel>), 200)]
         [Authorize]
         [HttpPut("changeScore")]
-        public async Task<ApiResult<SuccessResult>> ChangeScore([FromBody]JObject model)
+        public async Task<dynamic> ChangeScore([FromBody]ScoreParam model)
         {
-            var apiResult = new ApiResult<SuccessResult>();
             try
             {
                 if (User == null)
+                {
+                    HttpContext.Response.StatusCode = 401;
                     return new ApiResult<SuccessResult>() { Errors = new List<Error> { new Error { Message = ErrorCodes.UNAUTHORIZED } } };
+                }
                 var claim = User.Claims
                                 .Where(_ => _.Type.Equals(AppConsts.USER_ID))
                                 .Select(_ => _.Value)
                                 .FirstOrDefault();
                 if (string.IsNullOrWhiteSpace(claim))
+                {
+                    HttpContext.Response.StatusCode = 401;
                     return new ApiResult<SuccessResult>() { Errors = new List<Error> { new Error { Message = ErrorCodes.UNAUTHORIZED } } };
-                var scoreParam = model.ToObject<ScoreParam>();
+                }
                 if (long.TryParse(claim, out long userId))
-                    scoreParam.UserId = userId;
+                    model.UserId = userId;
                 else
+                {
+                    HttpContext.Response.StatusCode = 400;
                     return new ApiResult<SuccessResult>() { Errors = new List<Error> { new Error { Message = ErrorCodes.PROTOCOL_INCORRECT } } };
-                apiResult = await _scoreProvider.UpdateScoreAsync(scoreParam);
+                }
+                var result = await _scoreProvider.UpdateScoreAsync(model);
+                return result;
             }
             catch (Exception)
             {
+                HttpContext.Response.StatusCode = 400;
                 return new ApiResult<SuccessResult> { Errors = new List<Error> { new Error { Message = ErrorCodes.PROTOCOL_INCORRECT } } };
             }
-            return apiResult;
         }
 
     }

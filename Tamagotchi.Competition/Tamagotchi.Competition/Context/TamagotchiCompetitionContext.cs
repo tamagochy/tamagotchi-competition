@@ -36,7 +36,7 @@ namespace Tamagotchi.Competition.Context
 
                 entity.Property(e => e.Finish)
                     .HasColumnName("FINISH")
-                    .HasColumnType("date");
+                    .HasColumnType("time");
 
                 entity.Property(e => e.RoomCode)
                     .IsRequired()
@@ -46,7 +46,7 @@ namespace Tamagotchi.Competition.Context
 
                 entity.Property(e => e.Start)
                     .HasColumnName("START")
-                    .HasColumnType("date");
+                    .HasColumnType("time");
 
                 entity.Property(e => e.Value).HasColumnName("VALUE");
             });

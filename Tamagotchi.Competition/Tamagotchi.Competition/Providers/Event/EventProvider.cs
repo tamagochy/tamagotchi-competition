@@ -1,12 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Tamagotchi.Competition.API;
 using Tamagotchi.Competition.Consts;
 using Tamagotchi.Competition.Context;
-using Tamagotchi.Competition.Helpers.API;
 using Tamagotchi.Competition.Models;
 
 namespace Tamagotchi.Competition.Providers.Event
@@ -25,7 +24,7 @@ namespace Tamagotchi.Competition.Providers.Event
             IQueryable<Events> evt = _ctx.Events.Where(x => x.ActionCode == model.ActionCode && x.RoomCode == model.RoomCode);
             if (!string.IsNullOrEmpty(model.DeseaseCode))
                 evt = evt.Where(x => x.DeseaseCode == model.DeseaseCode);
-            evt = evt.Where(x => x.Start >= model.EventDate && x.Finish <= model.EventDate);
+            evt = evt.Where(x => x.Start <= model.EventTime && x.Finish >= model.EventTime);
             if (evt == null && !await evt.AnyAsync())
                 return new ApiResult<EventViewModel> { Errors = new List<Error> { new Error { Message = ErrorCodes.BUSSINESS_CODE_EVENT_NOT_FOUND } } };
             return new ApiResult<EventViewModel>
@@ -40,7 +39,7 @@ namespace Tamagotchi.Competition.Providers.Event
                         StartDate = x.Start,
                         Value = x.Value
                     }).FirstOrDefaultAsync(CancellationToken.None)
-            };
+            };           
         }
     }
 }
