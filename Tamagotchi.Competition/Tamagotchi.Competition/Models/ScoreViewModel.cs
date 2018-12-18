@@ -7,7 +7,8 @@ namespace Tamagotchi.Competition.Models
     {
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public long? ScoreId { get; set; }
-        [JsonProperty("id", NullValueHandling = NullValueHandling.Ignore)]
+        //[JsonProperty("id", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonIgnore]
         public long? UserId { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string Login { get; set; }
